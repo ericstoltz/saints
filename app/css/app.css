@@ -289,7 +289,7 @@ body.is-camera.cam-live .topbar {
   border: 3px solid #fff; background: transparent;
   box-shadow: 0 0 0 2px var(--sg-teal), inset 0 0 0 1px rgba(21,82,99,.6);
   transition: opacity .25s;
-  min-width: 44px; min-height: 44px;
+  min-width: 60px; min-height: 60px;
 }
 .spot.is-stale { opacity: 0; pointer-events: none; }
 .camera__scrim { position: absolute; inset: 0; width: 100%; height: 100%; }
