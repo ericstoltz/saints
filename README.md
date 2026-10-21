@@ -22,6 +22,34 @@ Add `?mobile=1` to the address to force the phone layout on a laptop with a webc
 
 ## How the camera recognition works
 
+The camera names saints in two ways, and uses both at once.
+
+### Faces and portraits
+
+`js/face-worker.js` finds painted faces in the camera picture and names each one by comparing it
+with the saints' portraits, one straight-on portrait per saint. No wall photos are needed.
+
+- A face finder (`models/blazeface.onnx`, MediaPipe BlazeFace full range, Apache 2.0) draws a
+  circle on every face it finds.
+- When a face is tapped, it and its nearest neighbours are cut from the full-size picture and
+  turned into image embeddings by `models/siglip.onnx` (Google's SigLIP B/16 image encoder,
+  Apache 2.0, 4-bit, 55 MB, downloaded in the background when the camera opens).
+- Each embedding is compared with the portraits (`data/faces.bin`). The order of saints on the
+  mural (`data/faces.js`) then checks that each guess agrees with the faces next to it.
+- When the match is clear, the profile opens. Otherwise the person picks from the three
+  closest saints, or types a name.
+
+Add `?faces=only` to the address to test this without the wall photos below.
+
+Rebuild the portrait data after changing a portrait: `python3 tools/build_faces.py` (needs
+Python with Pillow, numpy and onnxruntime). `tools/export_siglip.py` rebuilds the SigLIP model
+from Google's published weights (`webli_en_b16_224_63724782.npz` from the big_vision bucket).
+
+The models run with ONNX Runtime Web (`vendor/ort/`, MIT). The web server must send `.mjs`
+files as JavaScript and `.wasm` files as `application/wasm` (most servers do).
+
+### Wall photos
+
 `js/vision.js` compares each camera frame with reference photos of the mural using image
 features (ORB) and a perspective fit, so it copes with the phone being held at an angle.
 Each reference is a "view": one photo crop of a flat stretch of wall. Every face also gets
@@ -69,5 +97,8 @@ which saints the brochure shows on each wall, useful when marking faces on new p
 ## Third-party code
 
 - jsfeat (MIT), `app/vendor/jsfeat-min.js`
+- ONNX Runtime Web (MIT), `app/vendor/ort/`
+- BlazeFace face detector (Apache 2.0, Google MediaPipe), `app/models/blazeface.onnx`
+- SigLIP image encoder (Apache 2.0, Google big_vision), `app/models/siglip.onnx`
 - Lexend Deca font (SIL Open Font License), `app/fonts/`
 - Logo, cross mark and loading illustration: St. Gregory of Nyssa Episcopal Church

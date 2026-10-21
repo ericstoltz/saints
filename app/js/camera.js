@@ -19,16 +19,39 @@
   var actx = analysis.getContext('2d', { willReadFrequently: true });
   var spare = null;     // recycled frame buffer
   var selected = null;  // {id, x, y, r}
+  // Face finder (js/face-worker.js): circles any painted face, and names it from the portraits on tap.
+  var faceWorker = null, faceBusy = false, faceRound = 0, faceSpare = null, faceSeq = 0;
+  var identity = null, identToken = 0, onIdentity = null;
+  var faceCanvas = document.createElement('canvas'), fctx = faceCanvas.getContext('2d', { willReadFrequently: true });
 
   function t(k) { return DS.t(k); }
 
   // ---------- worker and references ----------
+  // ?faces=only turns off the wall photos, to test recognition from the portraits alone.
+  var facesOnly = /[?&]faces=only\b/.test(location.search);
   function initWorker() {
+    if (facesOnly) { refsLoaded = true; return; }
     if (worker) return;
     worker = new Worker('js/vision-worker.js?v=' + CONFIG.version);
     worker.onmessage = onWorker;
     if (!window.MURAL) { refsLoaded = true; return; }
     worker.postMessage({ type: 'refs', meta: MURAL.refs, url: new URL(MURAL.refsFile + '?v=' + CONFIG.version, location.href).href });
+  }
+  function initFaceWorker() {
+    if (faceWorker || typeof WebAssembly !== 'object') return;
+    faceWorker = new Worker('js/face-worker.js?v=' + CONFIG.version);
+    faceWorker.onmessage = onFaceWorker;
+    faceWorker.postMessage({ type: 'warm' });   // start fetching the naming model in the background
+  }
+  function onFaceWorker(e) {
+    var m = e.data;
+    if (m.type === 'faces') {
+      faceBusy = false; faceSpare = m.rgba;
+      if (running && !frozen) handleFaces(m.faces, m.w);
+    } else if (m.type === 'identity' && m.token === identToken) {
+      identity = m.error ? { error: m.error } : m;
+      if (onIdentity) { var f = onIdentity; onIdentity = null; f(); }
+    }
   }
   function refDone() { refsLoaded = true; maybeReady(); }
 
@@ -51,6 +74,7 @@
     loader.hidden = false;
     setStatus('');
     initWorker();
+    initFaceWorker();
     navigator.mediaDevices.getUserMedia({
       audio: false,
       video: { facingMode: { ideal: 'environment' }, width: { ideal: 1920 }, height: { ideal: 1080 } }
@@ -90,7 +114,8 @@
   function tick() {
     if (!running) return;
     rafId = requestAnimationFrame(tick);
-    if (frozen || busy || video.readyState < 2 || !video.videoWidth) return;
+    if (frozen || (busy && !facesOnly) || video.readyState < 2 || !video.videoWidth) return;
+    if (facesOnly && faceBusy) return;
     var aw = CONFIG.analysisWidth, vw = video.videoWidth, vh = video.videoHeight;
     var ah = Math.round(vh * aw / vw);
     if (analysis.width !== aw || analysis.height !== ah) { analysis.width = aw; analysis.height = ah; }
@@ -98,10 +123,21 @@
     var img = actx.getImageData(0, 0, aw, ah);
     var buf = (spare && spare.byteLength === img.data.byteLength) ? spare : new ArrayBuffer(img.data.byteLength);
     new Uint8ClampedArray(buf).set(img.data);
-    spare = null; busy = true; frameNo++;
+    spare = null; frameNo++;
     // While a wall is in view, look mostly for that wall (faster); do a full search every few frames.
     var tracking = Date.now() - lastFound.at < 1000 && frameNo % 4 !== 0;
-    worker.postMessage({ type: 'frame', rgba: buf, w: aw, h: ah, only: tracking ? lastFound.ids : null }, [buf]);
+    if (!facesOnly) { busy = true; worker.postMessage({ type: 'frame', rgba: buf, w: aw, h: ah, only: tracking ? lastFound.ids : null }, [buf]); }
+    if (faceWorker && !faceBusy) {
+      // the face finder looks at a larger picture, since painted faces are small
+      var fw = Math.min(CONFIG.faceAnalysisWidth || 640, vw), fh = Math.round(vh * fw / vw);
+      if (faceCanvas.width !== fw || faceCanvas.height !== fh) { faceCanvas.width = fw; faceCanvas.height = fh; }
+      fctx.drawImage(video, 0, 0, fw, fh);
+      var fimg = fctx.getImageData(0, 0, fw, fh);
+      var fb = (faceSpare && faceSpare.byteLength === fimg.data.byteLength) ? faceSpare : new ArrayBuffer(fimg.data.byteLength);
+      new Uint8ClampedArray(fb).set(fimg.data);
+      faceSpare = null; faceBusy = true;
+      faceWorker.postMessage({ type: 'detect', rgba: fb, w: fw, h: fh, rot: faceRound++ }, [fb]);
+    }
     updateStale();
   }
 
@@ -134,9 +170,36 @@
         if (sc.x < -rad || sc.y < -rad || sc.x > cw + rad || sc.y > ch + rad || !isFinite(rad)) return;
         if (h.saint === 'jesus') { banner = { key: 'jesusBanner', seen: now }; return; }
         placeSpot(h.saint, sc.x, sc.y, Math.max(36, rad), now);
+        dropFacesNear(sc.x, sc.y, Math.max(36, rad));
       });
     });
     updateStale();
+  }
+
+  // Faces from the face finder. A face already circled from a wall photo keeps that circle.
+  // Each face keeps its circle from frame to frame by matching it to the nearest one.
+  function handleFaces(faces, aw) {
+    var now = Date.now();
+    faces.forEach(function (f) {
+      var sc = toScreen({ x: f.x, y: f.y }, aw), r = Math.max(36, f.w * 1.5 * sc.scale);
+      var near = null, nd = 1e9;
+      Object.keys(spots).forEach(function (id) {
+        var s = spots[id], d = Math.hypot(s.x - sc.x, s.y - sc.y);
+        if (d < Math.max(s.r, r) * 0.8 && d < nd) { near = id; nd = d; }
+      });
+      if (near && near.charAt(0) !== '~') { if (now - spots[near].seen < 1500) return; }
+      var id = near || ('~' + (++faceSeq));
+      placeSpot(id, sc.x, sc.y, r, now);
+      var s = spots[id]; s.face = { x: f.x, y: f.y, w: f.w, aw: aw };
+    });
+    updateStale();
+  }
+
+  function dropFacesNear(x, y, r) {
+    Object.keys(spots).forEach(function (id) {
+      var s = spots[id];
+      if (id.charAt(0) === '~' && Math.hypot(s.x - x, s.y - y) < Math.max(r, s.r) * 0.8) { s.el.remove(); delete spots[id]; }
+    });
   }
 
   function placeSpot(id, x, y, r, now) {
@@ -161,7 +224,7 @@
   function updateStale() {
     var now = Date.now(), any = false;
     Object.keys(spots).forEach(function (id) {
-      var s = spots[id], stale = now - s.seen > CONFIG.holdMs;
+      var s = spots[id], stale = now - s.seen > (id.charAt(0) === '~' ? 2500 : CONFIG.holdMs);
       s.el.classList.toggle('is-stale', stale);
       if (now - s.seen > 4000) { s.el.remove(); delete spots[id]; } else if (!stale) any = true;
     });
@@ -179,8 +242,40 @@
     var el = e.target.closest('.spot');
     if (!el || frozen) return;
     var s = spots[el.dataset.id];
-    freeze({ id: el.dataset.id, x: s.x, y: s.y, r: s.r });
+    freeze({ id: el.dataset.id, x: s.x, y: s.y, r: s.r, face: s.face });
   });
+
+  // Cut the tapped face and its neighbours from the full-size picture and ask the face worker who it is.
+  var cropCanvas = document.createElement('canvas'), cctx = cropCanvas.getContext('2d', { willReadFrequently: true });
+  function startIdentify(sel) {
+    identity = null; onIdentity = null; identToken++;
+    if (!faceWorker || !sel.face) { identity = { error: 'no face' }; return; }
+    var vw = video.videoWidth, k = vw / sel.face.aw, size = 224;
+    var others = Object.keys(spots).map(function (id) { return spots[id]; }).filter(function (s) {
+      return s.face && s.face !== sel.face && Date.now() - s.seen < 3000 &&
+        Math.hypot(s.face.x - sel.face.x, s.face.y - sel.face.y) < 5 * Math.max(s.face.w, sel.face.w);
+    }).sort(function (a, b) {
+      return Math.hypot(a.face.x - sel.face.x, a.face.y - sel.face.y) - Math.hypot(b.face.x - sel.face.x, b.face.y - sel.face.y);
+    }).map(function (s) { return s.face; }).slice(0, 4);
+    var list = [sel.face].concat(others);
+    cropCanvas.width = cropCanvas.height = size;
+    var crops = list.map(function (f) {
+      var side = f.w * 1.8 * k, cx = f.x * k, cy = (f.y - 0.12 * f.w) * k;
+      cctx.fillStyle = '#000'; cctx.fillRect(0, 0, size, size);
+      cctx.drawImage(video, cx - side / 2, cy - side / 2, side, side, 0, 0, size, size);
+      return cctx.getImageData(0, 0, size, size).data;
+    });
+    faceWorker.postMessage({ type: 'identify', token: identToken, crops: crops,
+      faces: list.map(function (f) { return { x: f.x * k, y: f.y * k, w: f.w * k }; }) },
+      crops.map(function (c) { return c.buffer; }));
+  }
+  // Run fn once the name is known (shows "Looking closely" meanwhile).
+  function whenIdentified(fn) {
+    if (identity) { fn(); return; }
+    showStep('wait');
+    onIdentity = fn;
+  }
+  function isFace(sel) { return sel && sel.id.charAt(0) === '~'; }
 
   function freeze(sel) {
     frozen = true; selected = sel;
@@ -203,6 +298,7 @@
     scrim.removeAttribute('hidden');
     showStep('ask');
     tray.hidden = false;
+    if (isFace(sel)) startIdentify(sel);
     $('#who-btn').focus({ preventScroll: true });
   }
 
@@ -215,6 +311,7 @@
     Object.keys(spots).forEach(function (id) { spots[id].el.hidden = false; spots[id].seen = 0; });
     $('#guess-input').value = '';
     hideList();
+    identToken++; identity = null; onIdentity = null; pickMode = false;
     if (!silent && running) setStatus(t('cameraPoint'));
   }
 
@@ -230,14 +327,48 @@
   });
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && frozen && !screen.hidden) unfreeze(); });
   $('#who-btn').addEventListener('click', function () { showStep('choose'); $('#guess-btn').focus(); });
-  $('#tell-btn').addEventListener('click', function () { reveal(); });
+  $('#tell-btn').addEventListener('click', function () { tell(); });
+
+  // "Tell me": a wall-photo circle already knows the saint; a face from the face finder is named
+  // from the portraits, and when the match isn't sure the person picks from the closest three.
+  function tell() {
+    if (!isFace(selected)) { reveal(); return; }
+    whenIdentified(function () {
+      if (!identity || identity.error) { showPick([]); return; }
+      if (identity.sure) reveal(identity.id); else showPick(identity.ranked.slice(0, 3));
+    });
+  }
+  var pickMode = false;
+  function showPick(cands) {
+    var ul = $('#pick-list');
+    cands = cands.filter(function (c) { return DS.byId[c.id]; });
+    ul.innerHTML = cands.map(function (c) {
+      var s = DS.byId[c.id], name = s ? DS.saintText(s).name : c.id;
+      return '<li><button type="button" class="pick__btn" data-id="' + c.id + '"><img src="img/saints/thumbs/' + c.id +
+        '.jpg?v=' + CONFIG.version + '" alt="" width="64" height="64"><span>' + name.replace(/</g, '&lt;') + '</span></button></li>';
+    }).join('');
+    ul.hidden = !cands.length;
+    showStep('pick');
+    var first = $('.pick__btn', ul) || $('#pick-other'); first.focus({ preventScroll: true });
+  }
+  $('#pick-list').addEventListener('click', function (e) {
+    var b = e.target.closest('.pick__btn'); if (b) reveal(b.dataset.id);
+  });
+  $('#pick-other').addEventListener('click', function () {
+    pickMode = true; showStep('guess');
+    setTimeout(function () { $('#guess-input').focus(); }, 50);
+  });
   $('#guess-btn').addEventListener('click', function () {
     showStep('guess');
     setTimeout(function () { $('#guess-input').focus(); }, 50);
   });
 
-  function reveal() {
-    var id = selected.id;
+  function reveal(id) {
+    id = id || selected.id;
+    if (!DS.byId[id]) {   // Jesus has no profile: show the caption instead
+      unfreeze(); if (id === 'jesus') { banner = { key: 'jesusBanner', seen: Date.now() + 3000 }; updateStale(); }
+      return;
+    }
     tray.hidden = true;
     DS.openSheet(id, { onClose: function () { unfreeze(); } });
   }
@@ -293,8 +424,10 @@
       var best = Fuzzy.search(input.value, entries(), 1)[0];
       if (best && best.score >= 0.8) guessId = best.entry.id;
     }
-    var right = guessId === selected.id;
     input.blur(); hideList();
+    if (pickMode) { if (guessId) reveal(guessId); else input.focus(); return; }
+    if (isFace(selected)) { whenIdentified(function () { judgeFaceGuess(guessId); }); return; }
+    var right = guessId === selected.id;
     var form = $('#guess-form');
     form.classList.add('is-dissolving');
     setTimeout(function () {
@@ -304,9 +437,23 @@
     }, 350);
   });
 
+  // A guess about a face from the face finder: right if it is the sure match, or one of the
+  // close matches when the portraits can't tell.
+  function judgeFaceGuess(guessId) {
+    var ok = identity && !identity.error, ranked = ok ? identity.ranked.map(function (c) { return c.id; }) : [];
+    var right = ok && (identity.sure ? guessId === identity.id : ranked.indexOf(guessId) >= 0);
+    showStep('result');
+    $('.tray__result').textContent = right ? t('youreRight') : t('notQuite');
+    setTimeout(function () {
+      if (right) reveal(guessId);
+      else if (ok && identity.sure) reveal(identity.id);
+      else showPick(ok ? identity.ranked.slice(0, 3) : []);
+    }, 1200);
+  }
+
   document.addEventListener('langchange', function () {
     if (running && !frozen && loader.hidden) setStatus(t('cameraPoint'));
   });
 
-  window.Camera = { start: start, stop: stop };
+  window.Camera = { start: start, stop: stop, _spots: function () { return spots; } };
 })();

@@ -6,8 +6,9 @@ window.CONFIG = {
   loadingImage: ['img/loading.webp', 'https://saintgregorys.org/wp-content/uploads/2024/10/SGN-web-footer-1-768x1024.png'],
   // Camera matching: frame width analyzed (smaller is faster, larger sees more detail).
   analysisWidth: 480,
+  faceAnalysisWidth: 640,   // picture width for the face finder
   // How long hotspots stay on screen after the mural is lost (ms).
   holdMs: 700,
   // Bump with each release so phones fetch fresh pictures and data instead of cached ones.
-  version: '20261021i'
+  version: '20261021j'
 };

@@ -334,6 +334,15 @@ body.is-camera.cam-live .topbar {
 }
 .combo__list li { padding: 10px 12px; border-radius: 4px; cursor: pointer; font-weight: 400; }
 .combo__list li[aria-selected="true"], .combo__list li:hover { background: var(--sg-cream); }
+.tray__wait { text-align: center; margin: 8px auto; color: var(--ink); }
+.tray__wait::after { content: ''; display: inline-block; width: 14px; height: 14px; margin-left: 10px; vertical-align: -2px;
+  border: 2px solid var(--sg-teal); border-right-color: transparent; border-radius: 50%; animation: spin .8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.pick__q { margin: 0 0 10px; font-weight: 600; text-align: center; }
+.pick__list { list-style: none; margin: 0 0 12px; padding: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.pick__btn { display: flex; flex-direction: column; align-items: center; gap: 6px; width: 100%; padding: 8px 4px;
+  border: 1px solid rgba(0,0,0,.12); border-radius: 8px; background: #fff; color: var(--ink); font: inherit; font-size: 14px; line-height: 1.25; cursor: pointer; }
+.pick__btn img { width: 64px; height: 64px; border-radius: 4px; object-fit: cover; }
 .tray__result { text-align: center; font-size: var(--fs-h1); font-weight: 600; color: var(--sg-teal); margin: 8px auto; animation: pop .4s var(--ease); }
 @keyframes pop { from { transform: scale(.7); opacity: 0; } }
 

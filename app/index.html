@@ -8,8 +8,8 @@
   <meta name="theme-color" content="#ffffff">
   <link rel="icon" href="img/favicon.png">
   <link rel="apple-touch-icon" href="img/apple-touch-icon.png">
-  <link rel="stylesheet" href="css/fonts.css?v=20261021i">
-  <link rel="stylesheet" href="css/app.css?v=20261021i">
+  <link rel="stylesheet" href="css/fonts.css?v=20261021j">
+  <link rel="stylesheet" href="css/app.css?v=20261021j">
 </head>
 <body>
   <a class="skip-link" href="#main" data-i18n="skip">Skip</a>
@@ -151,6 +151,12 @@
             <button type="submit" class="btn btn--primary btn--wide" data-i18n="findOut"></button>
           </form>
           <p class="tray__step tray__result" data-step="result" hidden role="status" aria-live="assertive"></p>
+          <p class="tray__step tray__wait" data-step="wait" hidden role="status" data-i18n="lookingClosely"></p>
+          <div class="tray__step pick" data-step="pick" hidden>
+            <p class="pick__q" data-i18n="oneOfThese"></p>
+            <ul class="pick__list" id="pick-list"></ul>
+            <button type="button" class="btn btn--secondary btn--wide" id="pick-other" data-i18n="someoneElse"></button>
+          </div>
         </div>
       </section>
 
@@ -223,13 +229,13 @@
     </div>
   </dialog>
 
-  <script src="js/config.js?v=20261021i"></script>
-  <script src="data/content.js?v=20261021i"></script>
-  <script src="data/saints.js?v=20261021i"></script>
-  <script src="data/saints.es.js?v=20261021i"></script>
-  <script src="data/mural.js?v=20261021i"></script>
-  <script src="js/fuzzy.js?v=20261021i"></script>
-  <script src="js/camera.js?v=20261021i"></script>
-  <script src="js/app.js?v=20261021i"></script>
+  <script src="js/config.js?v=20261021j"></script>
+  <script src="data/content.js?v=20261021j"></script>
+  <script src="data/saints.js?v=20261021j"></script>
+  <script src="data/saints.es.js?v=20261021j"></script>
+  <script src="data/mural.js?v=20261021j"></script>
+  <script src="js/fuzzy.js?v=20261021j"></script>
+  <script src="js/camera.js?v=20261021j"></script>
+  <script src="js/app.js?v=20261021j"></script>
 </body>
 </html>
