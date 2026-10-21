@@ -65,8 +65,8 @@ window.CONTENT = {
     ],
     commentaryPoem: ['God creates life', 'life beholds beauty', 'beauty begets love', 'love is the life of God.'],
     commentaryPhotoAlt: 'Sunlight streams into the rotunda of St. Gregory’s, above the altar and the dancing saints.',
-    iconographerEyebrow: 'Mark Dukes',
-    iconographerTitle: 'About the iconographer',
+    iconographerEyebrow: 'About the iconographer',
+    iconographerTitle: 'Mark Dukes',
     iconographerPhotoAlt: 'Portrait of Mark Dukes',
     iconographer: [
       'Mark Dukes is an artist whose contemporary paintings have been shown throughout the San Francisco Bay Area, at the African-American Museum in Dallas and the Sorbonne in Paris. He has painted icons at the African Orthodox Church of St. John Coltrane in San Francisco, where he is a deacon, and at Christ of the Hills Monastery in New Sarov, Texas. Mark Dukes says, “I see my personal and liturgical work as a calling, and a form of prayer and communication with God.”'
@@ -148,8 +148,8 @@ window.CONTENT = {
     ],
     commentaryPoem: ['Dios crea la vida', 'la vida contempla la belleza', 'la belleza engendra el amor', 'el amor es la vida de Dios.'],
     commentaryPhotoAlt: 'La luz del sol entra en la rotonda de San Gregorio, sobre el altar y los santos danzantes.',
-    iconographerEyebrow: 'Mark Dukes',
-    iconographerTitle: 'Sobre el iconógrafo',
+    iconographerEyebrow: 'Sobre el iconógrafo',
+    iconographerTitle: 'Mark Dukes',
     iconographerPhotoAlt: 'Retrato de Mark Dukes',
     iconographer: [
       'Mark Dukes es un artista cuyas pinturas contemporáneas se han expuesto en toda el Área de la Bahía de San Francisco, en el Museo Afroamericano de Dallas y en la Sorbona de París. Ha pintado iconos en la Iglesia Ortodoxa Africana de San Juan Coltrane en San Francisco, donde es diácono, y en el Monasterio de Cristo de las Colinas en New Sarov, Texas. Mark Dukes dice: «Veo mi trabajo personal y litúrgico como un llamado, y una forma de oración y comunicación con Dios».'
