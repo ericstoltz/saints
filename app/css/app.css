@@ -124,6 +124,7 @@ button { font: inherit; color: inherit; }
 }
 .splash__inner { margin: auto; max-width: 440px; width: 100%; text-align: center; display: grid; gap: 28px; justify-items: center; }
 .splash__logo { width: 210px; height: auto; }
+.splash__title-es { display: block; margin-top: 6px; font-size: 1.25rem; font-weight: 400; color: var(--sg-teal); }
 .splash__title { margin: -8px 0 0; font-family: var(--font-title); font-weight: 600; font-size: 2rem; line-height: 1.15; letter-spacing: -0.01em; color: var(--ink); }
 .splash__quote { margin: 0; }
 .splash__quote blockquote { margin: 0; font-size: 1.375rem; line-height: 1.4; font-weight: 400; }
