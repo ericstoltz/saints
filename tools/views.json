@@ -1,5 +1,5 @@
 {
- "_about": "Mural reference views for camera recognition. Each view is a crop of a photo in tools/photos/ covering one flat stretch of wall. faces: saint id -> [x, y] center of the face in the ORIGINAL photo's pixels. halo: halo diameter in original pixels (sets tile and hotspot size). Rebuild with: python3 tools/build_refs.py",
+ "_about": "Mural reference views for camera recognition. Each view is a crop of a photo in tools/photos/ covering one flat stretch of wall. faces: saint id -> [x, y] center of the face in the ORIGINAL photo's pixels. halo: halo diameter in original pixels (sets tile and hotspot size). Rebuild with: python3 tools/build_refs.py portraits: every file in tools/photos/portraits (index.json maps file -> saint id) becomes a reference; face is the usual face center as a fraction of width/height, faces overrides it per file, r is the hotspot radius as a fraction of width.",
  "views": [
   {
    "id": "sw-1737",
@@ -104,5 +104,14 @@
     ]
    }
   }
- ]
+ ],
+ "portraits": {
+  "longSide": 512,
+  "face": [
+   0.5,
+   0.31
+  ],
+  "r": 0.16,
+  "faces": {}
+ }
 }

@@ -196,7 +196,7 @@
     freezeCanvas.hidden = false;
     Object.keys(spots).forEach(function (id) { spots[id].el.hidden = true; });
     bannerEl.hidden = true;
-    var scrim = $('#cam-scrim'), r = sel.r * 1.08;
+    var scrim = $('#cam-scrim'), r = sel.r * 1.25;
     ['#scrim-circle', '#scrim-ring'].forEach(function (q) {
       var c = $(q); c.setAttribute('cx', sel.x); c.setAttribute('cy', sel.y); c.setAttribute('r', r);
     });
@@ -224,7 +224,11 @@
     });
   }
 
-  $('#tray-close').addEventListener('click', function () { unfreeze(); });
+  // Tapping the picture outside the selected face, or Escape, goes back to the live camera.
+  screen.addEventListener('click', function (e) {
+    if (frozen && !e.target.closest('.spot, #tray, button, a, input, form, [role="listbox"]')) unfreeze();
+  });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && frozen && !screen.hidden) unfreeze(); });
   $('#who-btn').addEventListener('click', function () { showStep('choose'); $('#guess-btn').focus(); });
   $('#tell-btn').addEventListener('click', function () { reveal(); });
   $('#guess-btn').addEventListener('click', function () {

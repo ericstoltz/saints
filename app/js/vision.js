@@ -16,13 +16,18 @@
   var RATIO = 0.8;
   var MIN_MATCHES = 10;
   var MIN_INLIERS = 12;
-  var MAX_RANSAC_REFS = 4;       // RANSAC is slow: only try the best-matched references
+  var MAX_RANSAC_REFS = 12;      // RANSAC is slow: only try the best-matched references
+  var MAX_RESULTS = 12;
   var NEAR = 12;                 // runner-up matches this close (per 400 ref px) are the same feature
 
   // Build-time settings (tools/build_refs.py)
   var BUILD = {
     view: { longSide: 1600, scales: [1, 0.7, 0.5, 0.35, 0.25, 0.18], maxKp: 350 },
-    tile: { longSide: 512, scales: [1.4, 1, 0.7, 0.5, 0.35], maxKp: 250 }
+    tile: { longSide: 512, scales: [1.4, 1, 0.7, 0.5, 0.35], maxKp: 250 },
+    portrait: { longSide: 512, scales: [1.4, 1, 0.7, 0.5], maxKp: 160,
+      // simulated oblique views: [direction of squeeze in degrees, squeeze factor]
+      // 90 = looking up at the wall (the usual case), 0 = from the side
+      tilts: [[90, 1.8], [0, 1.6]], tiltScales: [1, 0.6] }
   };
 
   var u_max = new Int32Array([15, 15, 15, 15, 14, 14, 14, 13, 13, 12, 11, 10, 9, 8, 6, 3, 0]);
@@ -130,9 +135,47 @@
       f.kp.forEach(function (p) { kps.push({ x: p.x / s / k, y: p.y / s / k }); });
       parts.push(f.desc);
     });
+    (cfg.tilts || []).forEach(function (tl) {
+      var v = tiltView(base, tl[0], tl[1]), A = v.inv;
+      cfg.tiltScales.forEach(function (s) {
+        var sw = Math.round(v.img.cols * s), sh = Math.round(v.img.rows * s);
+        if (sw < 80 || sh < 80) return;
+        var f = features(s === 1 ? v.img : resize(v.img, sw, sh), cfg.maxKp);
+        f.kp.forEach(function (p) {
+          var x = p.x / s, y = p.y / s;
+          kps.push({ x: (A[0] * x + A[1] * y + A[2]) / k, y: (A[3] * x + A[4] * y + A[5]) / k });
+        });
+        parts.push(f.desc);
+      });
+    });
     var desc = new Int32Array(kps.length * 8), off = 0;
     parts.forEach(function (p) { desc.set(p, off); off += p.length; });
     return { kp: kps, desc: desc };
+  }
+
+  // Simulate viewing a reference obliquely: squeeze it by 1/t along direction ang (degrees).
+  // Returns the warped image and the affine map from warped pixels back to the original.
+  function tiltView(src, ang, t) {
+    var a = ang * Math.PI / 180, c = Math.cos(a), sn = Math.sin(a), w = src.cols, h = src.rows;
+    var M = [c * c / t + sn * sn, c * sn - c * sn / t, 0, c * sn - c * sn / t, sn * sn / t + c * c, 0];
+    var cx = [0, w, w, 0], cy = [0, 0, h, h];
+    var xs = cx.map(function (x, i) { return M[0] * x + M[1] * cy[i]; });
+    var ys = cx.map(function (x, i) { return M[3] * x + M[4] * cy[i]; });
+    var mx = Math.min.apply(0, xs), my = Math.min.apply(0, ys);
+    M[2] = -mx; M[5] = -my;
+    var nw = Math.ceil(Math.max.apply(0, xs) - mx), nh = Math.ceil(Math.max.apply(0, ys) - my);
+    var det = M[0] * M[4] - M[1] * M[3];
+    var I = [M[4] / det, -M[1] / det, 0, -M[3] / det, M[0] / det, 0];
+    I[2] = -(I[0] * M[2] + I[1] * M[5]); I[5] = -(I[3] * M[2] + I[4] * M[5]);
+    var out = new jsfeat.matrix_t(nw, nh, jsfeat.U8_t | jsfeat.C1_t), d = out.data, sd = src.data;
+    for (var y = 0; y < nh; y++) for (var x = 0; x < nw; x++) {
+      var sx = I[0] * x + I[1] * y + I[2], sy = I[3] * x + I[4] * y + I[5];
+      if (sx < 0 || sy < 0 || sx >= w - 1 || sy >= h - 1) { d[y * nw + x] = 0; continue; }
+      var x0 = sx | 0, y0 = sy | 0, fx = sx - x0, fy = sy - y0, o = y0 * w + x0;
+      var top = sd[o] + (sd[o + 1] - sd[o]) * fx, bot = sd[o + w] + (sd[o + w + 1] - sd[o + w]) * fx;
+      d[y * nw + x] = (top + (bot - top) * fy + 0.5) | 0;
+    }
+    return { img: out, inv: I };
   }
 
   // ---- reference library ----
@@ -224,6 +267,106 @@
     return true;
   }
 
+  // ---- homography by RANSAC ----
+  // Solves h (with h33 = 1) from point pairs by least squares on the 8x8 normal equations.
+  // (jsfeat's version runs an eigen decomposition per hypothesis, which was most of the frame time.)
+  var ATA = new Float64Array(64), ATb = new Float64Array(8);
+  function solveH(from, to, idx, n) {
+    ATA.fill(0); ATb.fill(0);
+    var r = [0, 0, 0, 0, 0, 0, 0, 0], i, j, k;
+    for (k = 0; k < n; k++) {
+      var p = from[idx ? idx[k] : k], q = to[idx ? idx[k] : k], x = p.x, y = p.y, u = q.x, v = q.y;
+      for (var row = 0; row < 2; row++) {
+        if (row === 0) { r[0] = x; r[1] = y; r[2] = 1; r[3] = 0; r[4] = 0; r[5] = 0; r[6] = -u * x; r[7] = -u * y; }
+        else { r[0] = 0; r[1] = 0; r[2] = 0; r[3] = x; r[4] = y; r[5] = 1; r[6] = -v * x; r[7] = -v * y; }
+        var b = row === 0 ? u : v;
+        for (i = 0; i < 8; i++) { if (!r[i]) continue; ATb[i] += r[i] * b; for (j = 0; j < 8; j++) ATA[i * 8 + j] += r[i] * r[j]; }
+      }
+    }
+    // Gaussian elimination with partial pivoting
+    for (i = 0; i < 8; i++) {
+      var piv = i, best = Math.abs(ATA[i * 8 + i]);
+      for (k = i + 1; k < 8; k++) if (Math.abs(ATA[k * 8 + i]) > best) { best = Math.abs(ATA[k * 8 + i]); piv = k; }
+      if (best < 1e-12) return null;
+      if (piv !== i) {
+        for (j = 0; j < 8; j++) { var t = ATA[i * 8 + j]; ATA[i * 8 + j] = ATA[piv * 8 + j]; ATA[piv * 8 + j] = t; }
+        var tb = ATb[i]; ATb[i] = ATb[piv]; ATb[piv] = tb;
+      }
+      for (k = i + 1; k < 8; k++) {
+        var f = ATA[k * 8 + i] / ATA[i * 8 + i];
+        if (!f) continue;
+        for (j = i; j < 8; j++) ATA[k * 8 + j] -= f * ATA[i * 8 + j];
+        ATb[k] -= f * ATb[i];
+      }
+    }
+    var h = new Array(9); h[8] = 1;
+    for (i = 7; i >= 0; i--) {
+      var sum = ATb[i];
+      for (j = i + 1; j < 8; j++) sum -= ATA[i * 8 + j] * h[j];
+      h[i] = sum / ATA[i * 8 + i];
+    }
+    for (i = 0; i < 8; i++) if (!isFinite(h[i])) return null;
+    return h;
+  }
+  // Points are normalized (centered, unit scale) so the least-squares solve stays well conditioned.
+  function normalizer(pts) {
+    var mx = 0, my = 0, d = 0, n = pts.length, i;
+    for (i = 0; i < n; i++) { mx += pts[i].x; my += pts[i].y; }
+    mx /= n; my /= n;
+    for (i = 0; i < n; i++) d += Math.hypot(pts[i].x - mx, pts[i].y - my);
+    var s = d ? Math.SQRT2 * n / d : 1;
+    return { s: s, mx: mx, my: my, pts: pts.map(function (p) { return { x: (p.x - mx) * s, y: (p.y - my) * s }; }) };
+  }
+  var RANSAC_ITERS = 300, RANSAC_PX = 4;
+  function ransacHomography(from, to) {
+    var n = from.length; if (n < 4) return null;
+    var A = normalizer(from), B = normalizer(to);
+    var thr = RANSAC_PX * B.s, thr2 = thr * thr;
+    var bestCount = 0, bestMask = null, mask = new Uint8Array(n), idx = [0, 0, 0, 0], seed = 7 + n;
+    function rnd() { seed = (seed * 1103515245 + 12345) & 0x7fffffff; return seed % n; }
+    function score(h, out) {
+      var c = 0;
+      for (var k = 0; k < n; k++) {
+        var p = A.pts[k], z = h[6] * p.x + h[7] * p.y + h[8];
+        var u = (h[0] * p.x + h[1] * p.y + h[2]) / z - B.pts[k].x, v = (h[3] * p.x + h[4] * p.y + h[5]) / z - B.pts[k].y;
+        var ok = z > 0 && u * u + v * v < thr2; out[k] = ok ? 1 : 0; c += out[k];
+      }
+      return c;
+    }
+    var iters = RANSAC_ITERS;
+    for (var it = 0; it < iters; it++) {
+      for (var a = 0; a < 4; a++) { var r; do { r = rnd(); } while (idx.slice(0, a).indexOf(r) >= 0); idx[a] = r; }
+      var hs = solveH(A.pts, B.pts, idx, 4);
+      if (!hs) continue;
+      var c = score(hs, mask);
+      if (c > bestCount) {
+        bestCount = c; bestMask = mask.slice();
+        var w = c / n, need = Math.log(0.005) / Math.log(1 - w * w * w * w);
+        if (need < iters) iters = Math.max(20, Math.ceil(need));
+      }
+    }
+    if (bestCount < 4) return null;
+    // refine on all inliers; keep the refined fit unless it explains fewer points
+    var inl = []; for (var k = 0; k < n; k++) if (bestMask[k]) inl.push(k);
+    var h = solveH(A.pts, B.pts, inl, inl.length);
+    if (!h) return null;
+    var refined = new Uint8Array(n);
+    if (score(h, refined) >= bestCount) bestMask = refined;
+    // undo normalization: H = inv(TB) * h * TA
+    var sa = A.s, sb = B.s;
+    var TA = [sa, 0, -sa * A.mx, 0, sa, -sa * A.my, 0, 0, 1];
+    var TBi = [1 / sb, 0, B.mx, 0, 1 / sb, B.my, 0, 0, 1];
+    var H = mul3(TBi, mul3(h, TA)); var z = H[8];
+    for (k = 0; k < 9; k++) H[k] /= z;
+    return { H: H, mask: bestMask };
+  }
+  function mul3(a, b) {
+    var r = new Array(9);
+    for (var i = 0; i < 3; i++) for (var j = 0; j < 3; j++)
+      r[i * 3 + j] = a[i * 3] * b[j] + a[i * 3 + 1] * b[3 + j] + a[i * 3 + 2] * b[6 + j];
+    return r;
+  }
+
   // Find mural views in a frame. Returns [{id (view), H (view px -> frame px), inliers}].
   // onlyIds (optional): search just these views, for speed while tracking.
   function findInFrame(rgba, w, h, onlyIds) {
@@ -279,12 +422,9 @@
       .forEach(function (ri) {
         var m = byRef[ri], ref = refs[ri];
         var from = m.map(function (p) { return p.from; }), to = m.map(function (p) { return p.to; });
-        var model = new jsfeat.matrix_t(3, 3, jsfeat.F32_t | jsfeat.C1_t);
-        var mask = new jsfeat.matrix_t(m.length, 1, jsfeat.U8_t | jsfeat.C1_t);
-        var params = new jsfeat.ransac_params_t(4, 4, 0.5, 0.995);
-        var ok = jsfeat.motion_estimator.ransac(params, new jsfeat.motion_model.homography2d(),
-          from, to, m.length, model, mask, 1000);
-        if (!ok) return;
+        var fit = ransacHomography(from, to);
+        if (!fit) return;
+        var mask = { data: fit.mask };
         var inl = 0, k, x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9;
         for (k = 0; k < m.length; k++) if (mask.data[k]) {
           inl++;
@@ -292,7 +432,7 @@
           if (q.x < x0) x0 = q.x; if (q.x > x1) x1 = q.x; if (q.y < y0) y0 = q.y; if (q.y > y1) y1 = q.y;
         }
         if (inl < MIN_INLIERS || inl < m.length * 0.25) return;
-        var H = Array.prototype.slice.call(model.data, 0, 9);
+        var H = fit.H;
         // Sanity-check the mapping on the matched part of the reference (in an angled
         // close-up the rest of the view can legitimately fold behind the camera).
         var corners = [[x0, y0], [x1, y0], [x1, y1], [x0, y1]];
@@ -311,7 +451,7 @@
       });
     var results = Object.keys(byView).map(function (id) { return byView[id]; });
     results.sort(function (a, b) { return b.inliers - a.inliers; });
-    return results.slice(0, 2);
+    return results.slice(0, MAX_RESULTS);
   }
 
   var api = { extract: extract, loadPacked: loadPacked, findInFrame: findInFrame, project: project, BUILD: BUILD };

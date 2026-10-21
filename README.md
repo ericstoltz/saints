@@ -37,12 +37,14 @@ The features are computed ahead of time, so the phone only downloads `data/refs.
    `app/data/mural.js` and `app/data/refs.bin`, and saves each view with its faces circled
    in `tools/previews/` so you can check the positions.
 
-Covered so far, from one photo: the southwest wall, part of the south wall, and John
-Coltrane (16 saints). The other walls need photos.
+Every saint also has a straight-on portrait (`tools/photos/portraits/`, from the church's
+Flickr album). Saints not yet on a wall photo use their portrait as a reference, which works
+when the phone is fairly close. Wall photos work much better from the floor, because the
+portraits were taken from up close and look different from below.
 
-Good reference photos: taken from the floor in normal lighting, sharp, with each stretch
-of wall filling most of the frame. Two photos per wall from different spots (left and right
-of center) make recognition work from more angles; close-ups of the upper row help too.
+Covered by a wall photo so far: the southwest wall, part of the south wall, and John
+Coltrane (16 saints). One sharp photo per stretch of wall, taken from the floor, is enough;
+the build simulates other angles.
 
 To add the apse painting of St. Gregory preaching, add a view with `"banner": "apseBanner"`
 and no faces; the app then shows the caption whenever it sees it.
@@ -53,12 +55,12 @@ Styling follows `design.md` (taken from saintgregorys.org). Colors and fonts are
 
 ## Content
 
-- `app/data/saints.js`: profiles taken from the brochure (Cesar Chavez left out; Sergius &
+- `app/data/saints.js`: profiles taken from the brochure (one brochure profile left out; Sergius &
   Bacchus and Nellie & Dorothy Lincoln listed together and separately with one profile).
 - `app/data/saints.es.js`: Spanish profiles (draft, needs a fluent reviewer).
 - `app/data/content.js`: interface text, commentary and iconographer text in both languages.
-- `app/img/saints/`: portraits from the brochure (low resolution, to be replaced with the
-  same file names).
+- `app/img/saints/`: portraits (640 px squares, and 128 px list thumbnails in `thumbs/`)
+  cut from the church's Flickr photos in `tools/photos/portraits/`.
 
 `tools/extract.py` and `tools/build_data.py` regenerate the saint data from the brochure
 PDF; `tools/saints_es.py` writes the Spanish file. `tools/hotspots.brochure.json` records

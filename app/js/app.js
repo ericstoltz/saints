@@ -200,6 +200,10 @@
     return e.label === s.name ? saintText(s).name : (t('memberNames')[e.label] || e.label);
   }
 
+  // Small list pictures; Nellie and Dorothy Lincoln each have their own portrait.
+  var MEMBER_THUMBS = { 'Nellie Lincoln': 'nellie-lincoln', 'Dorothy Lincoln': 'dorothy-lincoln' };
+  function thumbOf(e) { return 'img/saints/thumbs/' + (MEMBER_THUMBS[e.label] || e.id) + '.jpg'; }
+
   function renderList() {
     // Alphabetical by first name, as the names are shown ("Anne Frank" under A).
     sortedList.sort(function (a, b) {
@@ -211,7 +215,7 @@
       var names = [e.label, label, s.name, tx.name].concat(s.aliases);
       return '<li data-names="' + esc(names.join('|')) + '">' +
         '<button type="button" class="saint-row" data-id="' + s.id + '">' +
-        '<span class="thumb"><img data-src="' + s.image + '" alt="" width="60" height="60"></span>' +
+        '<span class="thumb"><img data-src="' + thumbOf(e) + '" alt="" width="60" height="60"></span>' +
         '<span class="saint-row__text"><span class="saint-row__name">' + esc(label) + '</span>' +
         (tx.dates ? '<span class="saint-row__dates">' + esc(tx.dates) + '</span>' : '') +
         '</span></button></li>';
@@ -339,6 +343,19 @@
       startY = null;
     });
   })();
+
+  // Tapping the app name in the header starts over at the opening screen.
+  $('.topbar__title').addEventListener('click', function (e) {
+    e.preventDefault();
+    if (window.Camera) Camera.stop();
+    closeMenu();
+    if (sheet.open) closeSheet();
+    history.replaceState(null, '', location.pathname + location.search);
+    startHash = ''; splashDone = false;
+    shell.hidden = true; hideIntro();
+    splash.classList.remove('is-out'); splash.hidden = false;
+    var first = $('[data-lang]', splash); if (first) first.focus({ preventScroll: true });
+  });
 
   // ---------- start ----------
   setLang(lang);

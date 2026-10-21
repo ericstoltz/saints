@@ -39,6 +39,25 @@ for v in spec['views']:
                      'a': round(side / TILE_PX * k, 6), 'ox': round((bx - x0) * k, 3), 'oy': round((by - y0) * k, 3)})
     prev.save(os.path.join(T, 'previews', v['id'] + '.jpg'), quality=80)
     views.append({'id': v['id'], 'w': W, 'h': H, 'hotspots': spots, **({'banner': v['banner']} if 'banner' in v else {})})
+# Portraits: one straight-on photo per saint (tools/photos/portraits, from the church's Flickr
+# album). Each is a reference on its own, so a saint can be found up close with no wall photo.
+# They were taken from a lift, so from the floor they match only at close range; a wall photo
+# works much better, and a saint on a wall photo doesn't get a portrait reference.
+# The face sits near the same spot in every portrait.
+P = spec.get('portraits')
+if P:
+    on_walls = {h['saint'] for v in views for h in v['hotspots']}
+    pdir = os.path.join(T, 'photos', 'portraits'); index = json.load(open(os.path.join(pdir, 'index.json')))
+    for f, sid in sorted(index.items()):
+        if sid in on_walls and not P.get('all'): continue
+        im = Image.open(os.path.join(pdir, f + '.jpg')).convert('RGB')
+        k = P['longSide'] / max(im.size); view = im.resize((round(im.width * k), round(im.height * k)), Image.LANCZOS)
+        W, H = view.size; fx, fy = P['faces'].get(f, P['face'])
+        raw = os.path.join(tmp, 'p-' + f + '.png'); view.convert('L').save(raw)
+        jobs.append({'file': raw, 'kind': 'portrait', 'view': 'p-' + f, 'w': W, 'h': H})
+        if sid == 'jesus':
+            views.append({'id': 'p-' + f, 'w': W, 'h': H, 'hotspots': [], 'banner': 'jesusBanner'}); continue
+        views.append({'id': 'p-' + f, 'w': W, 'h': H, 'hotspots': [{'saint': sid, 'x': fx, 'y': fy, 'r': P['r']}]})
 # convert pngs to raw gray for node
 for j in jobs:
     g = Image.open(j['file']); j['gw'], j['gh'] = g.size

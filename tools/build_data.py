@@ -9,14 +9,13 @@ entries = json.load(open(raw))
 
 NAME_FIX = {
     'BartolomÉ de las Casas': 'Bartolomé de las Casas',
-    'cesar Chavez': 'Cesar Chavez',
     '': 'Paul Erdős',
     'Andrei rublev': 'Andrei Rublev',
     'Jalal Ad-Din Rumi': 'Jalal ad-Din Rumi',
     "Lili'uokalani": 'Liliʻuokalani',
     'Samuel Isaac Joseph Scherechewsky': 'Samuel Isaac Joseph Schereschewsky',
 }
-EXCLUDE = {'Cesar Chavez'}
+EXCLUDE_NUMBERS = {36}   # brochure profiles left out of the app
 # sort key = brochure order (by family name); extra names people may type
 ALIASES = {
     'Mohandas Karamchand Gandhi': ['Gandhi', 'Mahatma Gandhi'],
@@ -73,8 +72,8 @@ saints = []
 for i, e in enumerate(entries):
     name, _, nums = e['heading'].partition('•')
     name = NAME_FIX.get(name.strip(), name.strip())
-    if name in EXCLUDE: continue
     numbers = [int(n) for n in re.findall(r'\d+', nums)]
+    if EXCLUDE_NUMBERS & set(numbers): continue
     body = clean(e['body'])
     lifespan = None
     m = re.match(r'^\(([^)]*)\)\s*', body)
