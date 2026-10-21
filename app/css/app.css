@@ -24,7 +24,7 @@
   --scrim: rgba(255, 255, 255, 0.3);
 
   --font: 'Lexend Deca', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-title: 'Federant', 'Lexend Deca', Georgia, serif; /* page titles only */
+  --font-title: var(--font); /* page titles: Lexend Deca 600 */
   --fs-hero: 2.5rem;
   --fs-h1: 2rem;
   --fs-h2: 1.5rem;
@@ -86,7 +86,7 @@ button { font: inherit; color: inherit; }
   margin: 0 0 6px; color: var(--accent);
   font-size: var(--fs-eyebrow); font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
 }
-.page h1, .intro__crawl h1, .topbar__title span { font-family: var(--font-title); font-weight: 400; letter-spacing: 0; }
+.page h1, .intro__crawl h1, .topbar__title span { font-family: var(--font-title); font-weight: 600; letter-spacing: -0.01em; }
 .page h1::after {
   content: ''; display: block; width: 40px; height: 3px; margin-top: 14px; background: var(--accent);
 }

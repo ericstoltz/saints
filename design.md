@@ -71,7 +71,7 @@ The logo's quartered cross uses four tiles that line up with the accents: yellow
 - **Lexend Deca** is a free Google Font (weights 300–900). Load from Google Fonts: `https://fonts.googleapis.com/css2?family=Lexend+Deca:wght@300;400;600;700&display=swap`.
 - **StGregory** is a custom Arts-and-Crafts face matching the logo lettering, served from `https://saintgregorys.org/wp-content/themes/saint-gregorys/assets/fonts/stgregory/stgregory-400-normal.ttf`. Its license is unknown, so ask the church before bundling it. Use it only for page titles and the "SAINT GREGORY'S" header wordmark, never for body text. Fallback if it can't be used: the logo image for the wordmark, and Lexend Deca 600 for titles.
 - Fallback stack: `"Lexend Deca", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`.
-- **App title font: Federant** (Google Fonts, SIL Open Font License) replaces StGregory in the app. It is the closest free match to the logo's Arts-and-Crafts lettering (flared strokes, high-waisted letters). Use it for page titles and the app wordmark only, never for body text. It has no ¿ or ¡, so the app lets those fall back to Lexend Deca. Load: `https://fonts.googleapis.com/css2?family=Federant&display=swap` (the app self-hosts it in `fonts/`).
+- **App title font: Lexend Deca.** The app uses Lexend Deca 600 (slightly tightened, -0.01em) for page titles and the app wordmark instead of StGregory. An earlier draft used Federant as a look-alike for the logo lettering; it was dropped so the app uses one typeface throughout.
 
 ## 4. Logo
 
@@ -113,7 +113,7 @@ Real photos only: the painted Dancing Saints icon circling the rotunda, the cand
 ## 9. App-specific decisions
 
 - **Casing:** prefer sentence case for headings, buttons, menu items and labels, except for proper names. This overrides the site's uppercase buttons; the small eyebrow labels above headings stay uppercase as on the site.
-- **Fonts:** Lexend Deca for all text, Federant for page titles (see section 3). Both self-hosted in the app.
+- **Fonts:** Lexend Deca for all text, including page titles (600 weight). Self-hosted in the app.
 - **Accents per screen:** browse uses orange, commentary wine, iconographer green, the desktop welcome teal.
 - **Camera:** face hotspots are white rings with a teal edge so they read on the orange and blue mural; the selected face gets a saffron ring and the rest of the frame a 30% white scrim.
 - **Loading:** the site's footer illustration (`SGN-web-footer`) with a saffron band scanning up and down.
@@ -123,8 +123,8 @@ Real photos only: the painted Dancing Saints icon circling the rotunda, the cand
 
 | Use | Size / line height | Font |
 | --- | --- | --- |
-| Intro hero title | 40px / 1.1 | Federant |
-| Page title (H1) | 32px / 1.2 | Federant |
+| Intro hero title | 40px / 1.1, 600 | Lexend Deca |
+| Page title (H1) | 32px / 1.2, 600 | Lexend Deca |
 | Saint name (H2) | 24px / 1.2, 600 | Lexend Deca |
 | List names (H3) | 18px / 1.3, 600 | Lexend Deca |
 | Body | 17px / 1.6, 300 | Lexend Deca |

@@ -62,5 +62,5 @@ PDF; `tools/saints_es.py` writes the Spanish file; `tools/build_mural.py` builds
 ## Third-party code
 
 - jsfeat (MIT), `app/vendor/jsfeat-min.js`
-- Lexend Deca and Federant fonts (SIL Open Font License), `app/fonts/`
+- Lexend Deca font (SIL Open Font License), `app/fonts/`
 - Logo, cross mark and loading illustration: St. Gregory of Nyssa Episcopal Church
