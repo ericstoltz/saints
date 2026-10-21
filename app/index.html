@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Dancing Saints · St. Gregory of Nyssa</title>
+  <meta name="description" content="Meet the ninety dancing saints painted in the rotunda of St. Gregory of Nyssa Episcopal Church, San Francisco.">
+  <meta name="theme-color" content="#ffffff">
+  <link rel="icon" href="img/favicon.png">
+  <link rel="apple-touch-icon" href="img/apple-touch-icon.png">
+  <link rel="stylesheet" href="css/fonts.css">
+  <link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+  <a class="skip-link" href="#main" data-i18n="skip">Skip</a>
+
+  <!-- 1. Loading screen: logo, quote, language choice -->
+  <section id="screen-loading" class="splash" aria-labelledby="loading-quote">
+    <div class="splash__inner">
+      <img class="splash__logo" data-src-logo alt="St. Gregory of Nyssa Episcopal Church" width="500" height="500">
+      <figure class="splash__quote">
+        <blockquote id="loading-quote"><p data-i18n="loadingQuote"></p></blockquote>
+        <figcaption>— <span data-i18n="loadingQuoteBy"></span></figcaption>
+      </figure>
+      <div class="splash__lang" role="group" aria-labelledby="choose-lang">
+        <p id="choose-lang" class="label" data-i18n="chooseLanguage"></p>
+        <div class="lang-buttons">
+          <button type="button" class="btn btn--lang" data-lang="en" lang="en">English</button>
+          <button type="button" class="btn btn--lang" data-lang="es" lang="es">Español</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. Intro: cover text, slowly scrolling, then camera permission -->
+  <section id="screen-intro" class="splash splash--intro" hidden aria-labelledby="intro-title">
+    <div class="intro__scroller" aria-live="off">
+      <div class="intro__crawl">
+        <img class="intro__christ" src="img/christ.webp" alt="" width="386" height="611">
+        <h1 id="intro-title" class="display" data-i18n="introTitle"></h1>
+        <p class="intro__church" data-i18n="church"></p>
+        <figure class="intro__quote">
+          <blockquote><p data-i18n="introQuote"></p></blockquote>
+          <figcaption>— <span data-i18n="introQuoteBy"></span></figcaption>
+        </figure>
+      </div>
+    </div>
+    <div class="intro__actions">
+      <div data-when="mobile">
+        <p data-i18n="introCameraNote"></p>
+        <button type="button" class="btn btn--on-photo" id="intro-camera" data-i18n="allowCamera"></button>
+        <a class="btn btn--link-light" href="#/browse" data-i18n="skipToList"></a>
+      </div>
+      <div data-when="desktop">
+        <p data-i18n="desktopMessage"></p>
+        <a class="btn btn--on-photo" href="#/home" data-i18n="continue"></a>
+      </div>
+    </div>
+  </section>
+
+  <!-- App shell -->
+  <div id="shell" hidden>
+    <header class="topbar">
+      <a class="topbar__title" href="#/" aria-label="Dancing Saints">
+        <img src="img/icon.png" alt="" width="32" height="32">
+        <span data-i18n="appName"></span>
+      </a>
+      <button type="button" class="icon-btn" id="menu-open" aria-controls="menu" aria-expanded="false">
+        <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+        <span class="visually-hidden" data-i18n="menu"></span>
+      </button>
+    </header>
+
+    <nav id="menu" class="menu" aria-label="Main" hidden>
+      <div class="menu__panel">
+        <div class="menu__head">
+          <span class="label" data-i18n="menu"></span>
+          <button type="button" class="icon-btn" id="menu-close">
+            <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>
+            <span class="visually-hidden" data-i18n="close"></span>
+          </button>
+        </div>
+        <div class="menu__lang" role="group" aria-label="Language">
+          <button type="button" data-lang="en" lang="en">EN</button>
+          <button type="button" data-lang="es" lang="es">ES</button>
+        </div>
+        <ul>
+          <li data-when="mobile"><a href="#/camera" data-i18n="navCamera"></a></li>
+          <li><a href="#/browse" data-i18n="navBrowse"></a></li>
+          <li><a href="#/commentary" data-i18n="navCommentary"></a></li>
+          <li><a href="#/iconographer" data-i18n="navIconographer"></a></li>
+        </ul>
+        <p class="menu__foot" data-i18n="church"></p>
+      </div>
+    </nav>
+
+    <main id="main" tabindex="-1">
+      <!-- Desktop home -->
+      <section id="screen-home" class="page accent-teal" hidden aria-labelledby="home-title">
+        <div class="page__inner home">
+          <p class="eyebrow" data-i18n="appName"></p>
+          <h1 id="home-title" data-i18n="desktopTitle"></h1>
+          <p class="lede" data-i18n="desktopMessage"></p>
+          <ul class="cards">
+            <li><a class="card" href="#/browse"><img src="img/mural/south.jpg" alt="" loading="lazy"><span class="card__text"><span class="card__title" data-i18n="navBrowse"></span></span></a></li>
+            <li><a class="card" href="#/commentary"><img src="img/rotunda.jpg" alt="" loading="lazy"><span class="card__text"><span class="card__title" data-i18n="navCommentary"></span></span></a></li>
+            <li><a class="card" href="#/iconographer"><img src="img/iconographer.jpg" alt="" loading="lazy"><span class="card__text"><span class="card__title" data-i18n="navIconographer"></span></span></a></li>
+            <li><a class="card card--christ" href="#/browse"><img src="img/christ.webp" alt="" loading="lazy"><span class="card__text"><span class="card__title" data-i18n="introTitle"></span></span></a></li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- Option 1: camera -->
+      <section id="screen-camera" class="camera" hidden aria-label="Camera">
+        <video id="cam-video" playsinline muted autoplay aria-hidden="true"></video>
+        <canvas id="cam-freeze" aria-hidden="true" hidden></canvas>
+        <svg id="cam-scrim" class="camera__scrim" aria-hidden="true" hidden>
+          <defs><mask id="scrim-hole"><rect width="100%" height="100%" fill="#fff"/><circle id="scrim-circle" fill="#000"/></mask></defs>
+          <rect width="100%" height="100%" fill="#fff" fill-opacity="0.3" mask="url(#scrim-hole)"/>
+          <circle id="scrim-ring" class="camera__ring"/>
+        </svg>
+        <div id="cam-spots" class="camera__spots"></div>
+        <p id="cam-banner" class="camera__banner" hidden></p>
+        <p id="cam-status" class="camera__status" role="status" aria-live="polite"></p>
+        <div id="cam-loading" class="loader" hidden>
+          <div class="loader__image"><img data-src-loading alt=""></div>
+          <p data-i18n="cameraStarting"></p>
+        </div>
+        <div id="cam-error" class="camera__error" hidden>
+          <p data-i18n="cameraDenied"></p>
+          <button type="button" class="btn btn--primary" id="cam-retry" data-i18n="cameraTryAgain"></button>
+          <a class="btn btn--secondary" href="#/browse" data-i18n="navBrowse"></a>
+        </div>
+
+        <!-- Identify tray: Who is this? → Let me guess / Tell me → guess form -->
+        <div id="tray" class="tray" hidden>
+          <button type="button" class="icon-btn tray__close" id="tray-close">
+            <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>
+            <span class="visually-hidden" data-i18n="backToCamera"></span>
+          </button>
+          <div class="tray__step" data-step="ask">
+            <button type="button" class="btn btn--primary btn--wide" id="who-btn" data-i18n="whoIsThis"></button>
+          </div>
+          <div class="tray__step" data-step="choose" hidden>
+            <button type="button" class="btn btn--secondary" id="guess-btn" data-i18n="letMeGuess"></button>
+            <button type="button" class="btn btn--primary" id="tell-btn" data-i18n="tellMe"></button>
+          </div>
+          <form class="tray__step guess" data-step="guess" id="guess-form" hidden autocomplete="off">
+            <label for="guess-input" data-i18n="guessLabel"></label>
+            <div class="combo">
+              <input id="guess-input" type="text" role="combobox" aria-autocomplete="list" aria-expanded="false"
+                     aria-controls="guess-list" autocapitalize="words" spellcheck="false" enterkeyhint="go">
+              <ul id="guess-list" role="listbox" class="combo__list" hidden></ul>
+            </div>
+            <button type="submit" class="btn btn--primary btn--wide" data-i18n="findOut"></button>
+          </form>
+          <p class="tray__step tray__result" data-step="result" hidden role="status" aria-live="assertive"></p>
+        </div>
+      </section>
+
+      <!-- Option 2: browse -->
+      <section id="screen-browse" class="page accent-orange" hidden aria-labelledby="browse-title">
+        <div class="page__inner">
+          <p class="eyebrow" data-i18n="appName"></p>
+          <h1 id="browse-title" data-i18n="browseTitle"></h1>
+          <p class="lede" data-i18n="browseIntro"></p>
+          <div class="filter">
+            <label for="filter" class="visually-hidden" data-i18n="filterLabel"></label>
+            <svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg>
+            <input id="filter" type="search" data-i18n-placeholder="filterPlaceholder" autocomplete="off">
+          </div>
+          <ul id="saint-list" class="saint-list" aria-labelledby="browse-title"></ul>
+          <p id="no-results" class="muted" data-i18n="noResults" hidden></p>
+        </div>
+      </section>
+
+      <!-- Option 3: commentary -->
+      <section id="screen-commentary" class="page accent-wine" hidden>
+        <article class="page__inner prose" aria-labelledby="commentary-title">
+          <p class="eyebrow" data-i18n="commentaryEyebrow"></p>
+          <h1 id="commentary-title" data-i18n="commentaryTitle"></h1>
+          <p class="byline" data-i18n="commentaryBy"></p>
+          <div id="commentary-body"></div>
+        </article>
+      </section>
+
+      <!-- Option 4: iconographer -->
+      <section id="screen-iconographer" class="page accent-green" hidden>
+        <article class="page__inner prose" aria-labelledby="iconographer-title">
+          <p class="eyebrow" data-i18n="iconographerEyebrow"></p>
+          <h1 id="iconographer-title" data-i18n="iconographerTitle"></h1>
+          <img class="portrait" src="img/iconographer.jpg" data-i18n-alt="iconographerPhotoAlt" width="315" height="387">
+          <div id="iconographer-body"></div>
+        </article>
+      </section>
+    </main>
+  </div>
+
+  <!-- Saint profile bottom sheet (shared by camera and browse) -->
+  <dialog id="sheet" class="sheet" aria-labelledby="sheet-name">
+    <div class="sheet__panel">
+      <div class="sheet__grip" aria-hidden="true"></div>
+      <button type="button" class="icon-btn sheet__close" data-close>
+        <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>
+        <span class="visually-hidden" data-i18n="close"></span>
+      </button>
+      <div class="sheet__scroll">
+        <article class="profile">
+          <img id="sheet-img" class="profile__img" alt="" width="324" height="324">
+          <h2 id="sheet-name" class="profile__name"></h2>
+          <p id="sheet-dates" class="profile__dates"></p>
+          <p id="sheet-bio" class="profile__bio"></p>
+          <p id="sheet-where" class="profile__where"></p>
+        </article>
+      </div>
+      <div class="sheet__foot">
+        <button type="button" class="icon-btn icon-btn--outline" id="sheet-prev">
+          <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>
+          <span class="visually-hidden" data-i18n="previous"></span>
+        </button>
+        <button type="button" class="btn btn--primary" data-close data-i18n="done"></button>
+        <button type="button" class="icon-btn icon-btn--outline" id="sheet-next">
+          <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>
+          <span class="visually-hidden" data-i18n="next"></span>
+        </button>
+      </div>
+    </div>
+  </dialog>
+
+  <script src="js/config.js"></script>
+  <script src="data/content.js"></script>
+  <script src="data/saints.js"></script>
+  <script src="data/saints.es.js"></script>
+  <script src="data/mural.js"></script>
+  <script src="js/fuzzy.js"></script>
+  <script src="js/camera.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
