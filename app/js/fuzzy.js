@@ -1,4 +1,4 @@
-/* Forgiving name matching for the "Let me guess" box. */
+/* Forgiving name matching for the "Let me guess" box and the browse search. */
 (function () {
   'use strict';
 
@@ -59,5 +59,36 @@
       .slice(0, limit || 6);
   }
 
-  window.Fuzzy = { search: search, norm: norm };
+  // Spelling variants that sound alike: Theresa/Teresa, Sofia/Sophia, Tereza/Teresa.
+  function fold(w) {
+    return w.replace(/th/g, 't').replace(/ph/g, 'f').replace(/ck/g, 'k').replace(/y/g, 'i')
+      .replace(/z/g, 's').replace(/(.)\1+/g, '$1');
+  }
+
+  // Browse search, as you type: every typed word must match the start of some word
+  // in a name, allowing for case, accents, spelling variants and small typos.
+  function matches(query, names) {
+    var qw = norm(query).split(' ').filter(Boolean);
+    if (!qw.length) return true;
+    return names.some(function (n) {
+      var nw = norm(n).split(' ').filter(Boolean), nf = nw.map(fold);
+      // short words must match as typed; longer ones may also match as spelling variants
+      return qw.every(function (q) { return wordMatch(q, nw) || (q.length >= 4 && wordMatch(fold(q), nf)); });
+    });
+  }
+  function wordMatch(q, nw) {
+    if (q.length >= 3 && nw.join('').indexOf(q) >= 0) return true;
+    var allowed = q.length >= 7 ? 2 : q.length >= 4 ? 1 : 0;
+    return nw.some(function (w) {
+      if (w.indexOf(q) === 0) return true;
+      if (!allowed) return false;
+      // compare with the start of the word: a letter shorter, the same length or a letter longer
+      for (var k = q.length - 1; k <= q.length + 1 && k <= w.length; k++) {
+        if (dist(q, w.slice(0, k)) <= allowed) return true;
+      }
+      return false;
+    });
+  }
+
+  window.Fuzzy = { search: search, norm: norm, matches: matches };
 })();

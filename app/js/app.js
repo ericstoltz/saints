@@ -245,10 +245,10 @@
 
   var filter = $('#filter');
   function applyFilter() {
-    var q = Fuzzy.norm(filter.value || '');
+    var q = filter.value || '';
     var shown = 0;
     $$('li', list).forEach(function (li) {
-      var ok = !q || li.dataset.names.split('|').some(function (n) { return Fuzzy.norm(n).indexOf(q) >= 0; });
+      var ok = Fuzzy.matches(q, li.dataset.names.split('|'));
       li.hidden = !ok; if (ok) shown++;
     });
     $('#no-results').hidden = shown > 0;
