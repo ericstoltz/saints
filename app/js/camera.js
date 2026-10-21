@@ -25,10 +25,10 @@
   // ---------- worker and references ----------
   function initWorker() {
     if (worker) return;
-    worker = new Worker('js/vision-worker.js');
+    worker = new Worker('js/vision-worker.js?v=' + CONFIG.version);
     worker.onmessage = onWorker;
     if (!window.MURAL) { refsLoaded = true; return; }
-    worker.postMessage({ type: 'refs', meta: MURAL.refs, url: new URL(MURAL.refsFile, location.href).href });
+    worker.postMessage({ type: 'refs', meta: MURAL.refs, url: new URL(MURAL.refsFile + '?v=' + CONFIG.version, location.href).href });
   }
   function refDone() { refsLoaded = true; maybeReady(); }
 

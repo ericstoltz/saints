@@ -202,7 +202,7 @@
 
   // Small list pictures; Nellie and Dorothy Lincoln each have their own portrait.
   var MEMBER_THUMBS = { 'Nellie Lincoln': 'nellie-lincoln', 'Dorothy Lincoln': 'dorothy-lincoln' };
-  function thumbOf(e) { return 'img/saints/thumbs/' + (MEMBER_THUMBS[e.label] || e.id) + '.jpg'; }
+  function thumbOf(e) { return 'img/saints/thumbs/' + (MEMBER_THUMBS[e.label] || e.id) + '.jpg?v=' + CONFIG.version; }
 
   function renderList() {
     // Alphabetical by first name, as the names are shown ("Anne Frank" under A).
@@ -262,7 +262,7 @@
   function fillSheet(id) {
     var s = byId[id], tx = saintText(s);
     var img = $('#sheet-img');
-    img.src = s.image; img.alt = tx.name;
+    img.src = s.image + '?v=' + CONFIG.version; img.alt = tx.name;
     $('#sheet-name').textContent = tx.name;
     $('#sheet-dates').textContent = tx.dates || '';
     $('#sheet-dates').hidden = !tx.dates;
@@ -333,7 +333,10 @@
     }, { passive: true });
     panel.addEventListener('touchmove', function (e) {
       if (startY == null) return;
-      dy = Math.max(0, e.touches[0].clientY - startY);
+      var d = e.touches[0].clientY - startY;
+      // Swiping up scrolls the text; only a downward pull drags the sheet.
+      if (d < 0 && !dy) { startY = null; panel.style.transition = ''; return; }
+      dy = Math.max(0, d);
       panel.style.transform = 'translateY(' + dy + 'px)';
     }, { passive: true });
     panel.addEventListener('touchend', function () {

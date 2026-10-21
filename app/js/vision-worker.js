@@ -1,6 +1,6 @@
 /* Runs the mural matcher off the main thread. */
 self.window = self;
-importScripts('../vendor/jsfeat-min.js', 'vision.js');
+importScripts('../vendor/jsfeat-min.js', 'vision.js' + self.location.search);
 
 self.onmessage = function (e) {
   var m = e.data;
