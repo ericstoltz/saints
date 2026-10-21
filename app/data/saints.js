@@ -1215,7 +1215,7 @@ window.SAINTS = {
   },
   {
    "id": "teresa-of-avila",
-   "name": "Teresa of Avila",
+   "name": "Teresa of Ávila",
    "numbers": [
     82
    ],
@@ -1692,7 +1692,7 @@ window.SAINTS = {
    "id": "lucian-tapiedi"
   },
   {
-   "label": "Teresa of Avila",
+   "label": "Teresa of Ávila",
    "id": "teresa-of-avila"
   },
   {

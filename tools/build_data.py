@@ -14,6 +14,7 @@ NAME_FIX = {
     'Jalal Ad-Din Rumi': 'Jalal ad-Din Rumi',
     "Lili'uokalani": 'Liliʻuokalani',
     'Samuel Isaac Joseph Scherechewsky': 'Samuel Isaac Joseph Schereschewsky',
+    'Teresa of Avila': 'Teresa of Ávila',
 }
 EXCLUDE_NUMBERS = {36}   # brochure profiles left out of the app
 # sort key = brochure order (by family name); extra names people may type
