@@ -367,6 +367,84 @@
      3027
     ]
    }
+  },
+  {
+   "id": "e-1743",
+   "photo": "IMG_1743.jpg",
+   "box": [
+    0,
+    1085,
+    2513,
+    2742
+   ],
+   "halo": 240,
+   "faces": {
+    "moses-the-black": [
+     143,
+     1302
+    ],
+    "eleanor-roosevelt": [
+     617,
+     1428
+    ],
+    "li-tim-oi": [
+     982,
+     1531
+    ],
+    "abraham-joshua-heschel": [
+     1371,
+     1645
+    ],
+    "mirabai": [
+     1685,
+     1742
+    ],
+    "anne-hutchinson": [
+     1971,
+     1839
+    ],
+    "black-elk": [
+     2313,
+     1931
+    ]
+   }
+  },
+  {
+   "id": "se-1743",
+   "photo": "IMG_1743.jpg",
+   "box": [
+    1799,
+    1885,
+    4284,
+    4398
+   ],
+   "halo": 257,
+   "faces": {
+    "nellie-dorothy-lincoln": [
+     2656,
+     2028
+    ],
+    "margaret-mead": [
+     2125,
+     2885
+    ],
+    "sadi": [
+     2456,
+     2925
+    ],
+    "w-edwards-deming": [
+     2856,
+     2942
+    ],
+    "sergius-bacchus": [
+     3227,
+     2827
+    ],
+    "jenny-read": [
+     4067,
+     2639
+    ]
+   }
   }
  ],
  "portraits": {

@@ -127,13 +127,13 @@
       if (!wall || !wall.refW) return;
       if (wall.banner) { banner = { key: wall.banner, seen: now }; }
       wall.hotspots.forEach(function (h) {
-        var cx = h.x * wall.refW, cy = h.y * wall.refH, rr = (h.r || 0.04) * wall.refW * 1.4;
+        var cx = h.x * wall.refW, cy = h.y * wall.refH, rr = (h.r || 0.04) * wall.refW * 2;
         var c = project(r.H, cx, cy), e = project(r.H, cx + rr, cy), e2 = project(r.H, cx, cy + rr);
         var sc = toScreen(c, aw);
         var rad = (Math.hypot(e.x - c.x, e.y - c.y) + Math.hypot(e2.x - c.x, e2.y - c.y)) / 2 * sc.scale;
         if (sc.x < -rad || sc.y < -rad || sc.x > cw + rad || sc.y > ch + rad || !isFinite(rad)) return;
         if (h.saint === 'jesus') { banner = { key: 'jesusBanner', seen: now }; return; }
-        placeSpot(h.saint, sc.x, sc.y, Math.max(30, rad), now);
+        placeSpot(h.saint, sc.x, sc.y, Math.max(36, rad), now);
       });
     });
     updateStale();
@@ -196,7 +196,7 @@
     freezeCanvas.hidden = false;
     Object.keys(spots).forEach(function (id) { spots[id].el.hidden = true; });
     bannerEl.hidden = true;
-    var scrim = $('#cam-scrim'), r = sel.r * 1.25;
+    var scrim = $('#cam-scrim'), r = sel.r * 1.1;
     ['#scrim-circle', '#scrim-ring'].forEach(function (q) {
       var c = $(q); c.setAttribute('cx', sel.x); c.setAttribute('cy', sel.y); c.setAttribute('r', r);
     });
