@@ -23,6 +23,9 @@
   // Build-time settings (tools/build_refs.py)
   var BUILD = {
     view: { longSide: 1600, scales: [1, 0.7, 0.5, 0.35, 0.25, 0.18], maxKp: 350 },
+    // flat views made from the rotunda panorama (soft, so finer scales are skipped)
+    pano: { longSide: 1400, scales: [0.8, 0.6, 0.45, 0.33, 0.25], maxKp: 300,
+      tilts: [[90, 1.6], [0, 1.5]], tiltScales: [0.6, 0.4] },
     tile: { longSide: 512, scales: [1.4, 1, 0.7, 0.5, 0.35], maxKp: 250 },
     portrait: { longSide: 512, scales: [1.4, 1, 0.7, 0.5], maxKp: 160,
       // simulated oblique views: [direction of squeeze in degrees, squeeze factor]

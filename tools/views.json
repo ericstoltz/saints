@@ -103,6 +103,270 @@
      2700
     ]
    }
+  },
+  {
+   "id": "nw-1740",
+   "photo": "IMG_1740.jpg",
+   "box": [
+    0,
+    0,
+    3250,
+    4150
+   ],
+   "halo": 257,
+   "faces": {
+    "john-muir": [
+     1902,
+     1325
+    ],
+    "maria-skobtsova": [
+     2262,
+     1411
+    ],
+    "donaldina-cameron": [
+     2559,
+     1497
+    ],
+    "chiune-sugihara": [
+     2845,
+     1554
+    ],
+    "mohandas-karamchand-gandhi": [
+     1656,
+     2428
+    ],
+    "paul-erdos": [
+     1988,
+     2496
+    ],
+    "martin-luther": [
+     2353,
+     2553
+    ],
+    "thomas-merton": [
+     2742,
+     2610
+    ],
+    "seraphim": [
+     1114,
+     2199
+    ],
+    "symeon": [
+     834,
+     486
+    ],
+    "charles-darwin": [
+     1085,
+     828
+    ],
+    "esther-john": [
+     1371,
+     1114
+    ]
+   }
+  },
+  {
+   "id": "n-1747",
+   "photo": "IMG_1747.jpg",
+   "box": [
+    857,
+    343,
+    4284,
+    3199
+   ],
+   "halo": 240,
+   "faces": {
+    "sojourner-truth": [
+     1171,
+     2428
+    ],
+    "bartolome-de-las-casas": [
+     1445,
+     2285
+    ],
+    "miriam": [
+     1714,
+     2102
+    ],
+    "origen": [
+     2039,
+     1856
+    ],
+    "malcolm-x": [
+     2399,
+     1571
+    ],
+    "elizabeth-i": [
+     2930,
+     1285
+    ],
+    "iqbal-masih": [
+     3330,
+     1200
+    ],
+    "teresa-of-avila": [
+     3816,
+     617
+    ]
+   }
+  },
+  {
+   "id": "nw-1747",
+   "photo": "IMG_1747.jpg",
+   "box": [
+    0,
+    2285,
+    1114,
+    4741
+   ],
+   "halo": 240,
+   "faces": {
+    "john-muir": [
+     69,
+     2502
+    ],
+    "maria-skobtsova": [
+     354,
+     2513
+    ],
+    "donaldina-cameron": [
+     617,
+     2525
+    ],
+    "chiune-sugihara": [
+     857,
+     2530
+    ],
+    "martin-luther": [
+     69,
+     3456
+    ],
+    "thomas-merton": [
+     343,
+     3496
+    ]
+   }
+  },
+  {
+   "id": "se-1734",
+   "photo": "IMG_1734.jpg",
+   "box": [
+    0,
+    971,
+    1999,
+    3941
+   ],
+   "halo": 257,
+   "faces": {
+    "nellie-dorothy-lincoln": [
+     411,
+     1514
+    ],
+    "sorghoqtani": [
+     1040,
+     1114
+    ],
+    "paulos-mar-gregorios": [
+     1399,
+     1171
+    ],
+    "william-blake": [
+     1742,
+     1171
+    ],
+    "w-edwards-deming": [
+     257,
+     2256
+    ],
+    "sergius-bacchus": [
+     731,
+     2285
+    ],
+    "jenny-read": [
+     1628,
+     2285
+    ]
+   }
+  },
+  {
+   "id": "s-upper-1734",
+   "photo": "IMG_1734.jpg",
+   "box": [
+    1942,
+    114,
+    3713,
+    2113
+   ],
+   "halo": 240,
+   "faces": {
+    "emily-dickinson": [
+     2142,
+     1057
+    ],
+    "norman-perrin": [
+     2428,
+     845
+    ],
+    "mary-magdalene": [
+     2787,
+     640
+    ],
+    "patrick-of-ireland": [
+     3113,
+     343
+    ]
+   }
+  },
+  {
+   "id": "s-alcove-1734",
+   "photo": "IMG_1734.jpg",
+   "box": [
+    2313,
+    1999,
+    4284,
+    4113
+   ],
+   "halo": 240,
+   "faces": {
+    "william-byrd": [
+     2468,
+     2668
+    ],
+    "desmond-mpilo-tutu": [
+     2885,
+     2656
+    ],
+    "alexandrian-washerwoman": [
+     3199,
+     2542
+    ],
+    "thomas-aquinas": [
+     3553,
+     2342
+    ],
+    "dante-alighieri": [
+     3941,
+     2199
+    ]
+   }
+  },
+  {
+   "id": "apse-1748",
+   "photo": "IMG_1748.jpg",
+   "box": [
+    1114,
+    1656,
+    2885,
+    3884
+   ],
+   "halo": 171,
+   "banner": "apseBanner",
+   "faces": {
+    "gregory-of-nyssa": [
+     1931,
+     3027
+    ]
+   }
   }
  ],
  "portraits": {
@@ -113,5 +377,390 @@
   ],
   "r": 0.16,
   "faces": {}
+ },
+ "panorama": {
+  "_about": "The church rotunda panorama (equirectangular, 4096x2048, taken from the floor center). faces: saint id -> [x, y] in panorama pixels. The build makes flat (perspective) views around the room and plain strips of the panorama itself. walls: x ranges (panorama pixels) of each flat wall; each becomes one flat view.",
+  "photo": "rotunda-panorama.jpg",
+  "halo": 42,
+  "faces": {
+   "nellie-dorothy-lincoln": [
+    2402,
+    545
+   ],
+   "sorghoqtani": [
+    2460,
+    552
+   ],
+   "paulos-mar-gregorios": [
+    2515,
+    555
+   ],
+   "william-blake": [
+    2565,
+    560
+   ],
+   "w-edwards-deming": [
+    2397,
+    690
+   ],
+   "sergius-bacchus": [
+    2455,
+    692
+   ],
+   "jenny-read": [
+    2567,
+    700
+   ],
+   "emily-dickinson": [
+    2632,
+    565
+   ],
+   "norman-perrin": [
+    2685,
+    562
+   ],
+   "mary-magdalene": [
+    2730,
+    553
+   ],
+   "patrick-of-ireland": [
+    2807,
+    555
+   ],
+   "desmond-mpilo-tutu": [
+    2685,
+    742
+   ],
+   "alexandrian-washerwoman": [
+    2725,
+    740
+   ],
+   "thomas-aquinas": [
+    2765,
+    740
+   ],
+   "dante-alighieri": [
+    2810,
+    745
+   ],
+   "jesus": [
+    2942,
+    562
+   ],
+   "gregory-of-nyssa": [
+    3085,
+    572
+   ],
+   "theosebia": [
+    3122,
+    577
+   ],
+   "lucy-wright": [
+    3175,
+    587
+   ],
+   "martha-graham": [
+    3222,
+    600
+   ],
+   "manche-masemola": [
+    3057,
+    757
+   ],
+   "isaiah": [
+    3090,
+    760
+   ],
+   "kangxi": [
+    3127,
+    762
+   ],
+   "roland-allen": [
+    3162,
+    767
+   ],
+   "simone-weil": [
+    3312,
+    605
+   ],
+   "liliuokalani": [
+    3352,
+    602
+   ],
+   "andrei-rublev": [
+    3395,
+    602
+   ],
+   "thurgood-marshall": [
+    3442,
+    602
+   ],
+   "barnabas": [
+    3295,
+    737
+   ],
+   "jalal-ad-din-rumi": [
+    3342,
+    735
+   ],
+   "julian-of-norwich": [
+    3391,
+    740
+   ],
+   "caspar-david-friedrich": [
+    3437,
+    740
+   ],
+   "francis-of-assisi": [
+    3497,
+    735
+   ],
+   "m-m-thomas": [
+    3537,
+    730
+   ],
+   "anne-frank": [
+    3525,
+    605
+   ],
+   "su-shi": [
+    3577,
+    567
+   ],
+   "ella-fitzgerald": [
+    3622,
+    560
+   ],
+   "samuel-isaac-joseph-schereschewsky": [
+    3690,
+    572
+   ],
+   "john-xxiii": [
+    3754,
+    545
+   ],
+   "florence-nightingale": [
+    3807,
+    542
+   ],
+   "lucian-tapiedi": [
+    3870,
+    537
+   ],
+   "david": [
+    3927,
+    537
+   ],
+   "symeon": [
+    3982,
+    540
+   ],
+   "seraphim": [
+    4072,
+    695
+   ],
+   "john-muir": [
+    90,
+    542
+   ],
+   "maria-skobtsova": [
+    145,
+    532
+   ],
+   "donaldina-cameron": [
+    200,
+    525
+   ],
+   "chiune-sugihara": [
+    257,
+    522
+   ],
+   "mohandas-karamchand-gandhi": [
+    60,
+    697
+   ],
+   "paul-erdos": [
+    107,
+    690
+   ],
+   "martin-luther": [
+    160,
+    685
+   ],
+   "thomas-merton": [
+    215,
+    682
+   ],
+   "sojourner-truth": [
+    345,
+    497
+   ],
+   "bartolome-de-las-casas": [
+    420,
+    467
+   ],
+   "miriam": [
+    515,
+    435
+   ],
+   "origen": [
+    620,
+    412
+   ],
+   "malcolm-x": [
+    742,
+    397
+   ],
+   "elizabeth-i": [
+    872,
+    407
+   ],
+   "iqbal-masih": [
+    982,
+    437
+   ],
+   "teresa-of-avila": [
+    1090,
+    432
+   ],
+   "william-shakespeare": [
+    1245,
+    453
+   ],
+   "hypatia": [
+    1267,
+    612
+   ],
+   "aelred-of-rievaulx": [
+    1330,
+    612
+   ],
+   "charles-wesley": [
+    1402,
+    612
+   ],
+   "julia-morgan": [
+    1470,
+    617
+   ],
+   "fyodor-dostoievski": [
+    1630,
+    445
+   ],
+   "wang-zhiming": [
+    1700,
+    437
+   ],
+   "marguerite-de-porete": [
+    1782,
+    435
+   ],
+   "paul-of-tarsus": [
+    1865,
+    435
+   ],
+   "moses-the-black": [
+    1952,
+    437
+   ],
+   "eleanor-roosevelt": [
+    2032,
+    445
+   ],
+   "li-tim-oi": [
+    2107,
+    460
+   ],
+   "abraham-joshua-heschel": [
+    2177,
+    475
+   ],
+   "mirabai": [
+    2235,
+    490
+   ],
+   "anne-hutchinson": [
+    2287,
+    512
+   ],
+   "black-elk": [
+    2337,
+    527
+   ],
+   "lady-godiva": [
+    1577,
+    612
+   ],
+   "janani-luwum": [
+    1652,
+    602
+   ],
+   "margaret-mead": [
+    2292,
+    662
+   ],
+   "sadi": [
+    2337,
+    680
+   ]
+  },
+  "walls": [
+   {
+    "id": "northwest",
+    "x": [
+     4060,
+     300
+    ]
+   },
+   {
+    "id": "north",
+    "x": [
+     300,
+     1150
+    ]
+   },
+   {
+    "id": "northeast",
+    "x": [
+     1150,
+     1520
+    ]
+   },
+   {
+    "id": "east",
+    "x": [
+     1520,
+     2370
+    ]
+   },
+   {
+    "id": "southeast",
+    "x": [
+     2360,
+     2600
+    ]
+   },
+   {
+    "id": "south",
+    "x": [
+     2600,
+     3260
+    ]
+   },
+   {
+    "id": "southwest",
+    "x": [
+     3260,
+     3560
+    ]
+   },
+   {
+    "id": "west",
+    "x": [
+     3500,
+     4096
+    ]
+   }
+  ]
  }
 }
