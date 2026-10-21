@@ -8,9 +8,10 @@
   var statusEl = $('#cam-status'), bannerEl = $('#cam-banner'), loader = $('#cam-loading'), errorBox = $('#cam-error');
   var tray = $('#tray'), screen = $('#screen-camera');
   var walls = {};
-  (window.MURAL ? MURAL.walls : []).forEach(function (w) { walls[w.id] = w; });
+  // Each mural view is a photo of one stretch of wall, with its faces marked (see tools/views.json).
+  (window.MURAL ? MURAL.views : []).forEach(function (w) { w.refW = w.w; w.refH = w.h; walls[w.id] = w; });
 
-  var stream = null, running = false, rafId = 0, worker = null, refsPending = 0, refsLoaded = false;
+  var stream = null, running = false, rafId = 0, worker = null, refsLoaded = false;
   var busy = false, frozen = false, frameNo = 0, lastFound = { ids: [], at: 0 };
   var spots = {};       // saint id -> {el, x, y, r, seen}
   var banner = { key: null, seen: 0 };
@@ -26,29 +27,14 @@
     if (worker) return;
     worker = new Worker('js/vision-worker.js');
     worker.onmessage = onWorker;
-    var list = Object.keys(walls);
-    refsPending = list.length;
-    list.forEach(function (id) {
-      var w = walls[id], img = new Image();
-      img.onload = function () {
-        var k = Math.min(1, 1600 / Math.max(img.naturalWidth, img.naturalHeight));
-        var cw = Math.round(img.naturalWidth * k), ch = Math.round(img.naturalHeight * k);
-        var c = document.createElement('canvas'); c.width = cw; c.height = ch;
-        var cx = c.getContext('2d'); cx.drawImage(img, 0, 0, cw, ch);
-        var d = cx.getImageData(0, 0, cw, ch).data, g = new Uint8Array(cw * ch);
-        for (var i = 0, j = 0; j < g.length; i += 4, j++) g[j] = (d[i] * 77 + d[i + 1] * 151 + d[i + 2] * 28) >> 8;
-        w.refW = cw; w.refH = ch;
-        worker.postMessage({ type: 'ref', id: id, gray: g.buffer, w: cw, h: ch }, [g.buffer]);
-      };
-      img.onerror = function () { refDone(); };
-      img.src = w.image;
-    });
+    if (!window.MURAL) { refsLoaded = true; return; }
+    worker.postMessage({ type: 'refs', meta: MURAL.refs, url: new URL(MURAL.refsFile, location.href).href });
   }
-  function refDone() { if (--refsPending <= 0) { refsLoaded = true; maybeReady(); } }
+  function refDone() { refsLoaded = true; maybeReady(); }
 
   function onWorker(e) {
     var m = e.data;
-    if (m.type === 'ref-ok') { refDone(); return; }
+    if (m.type === 'refs-ok' || m.type === 'refs-error') { refDone(); return; }
     if (m.type === 'result') {
       busy = false; spare = m.rgba;
       if (!running || frozen) return;

@@ -79,7 +79,7 @@ for i, e in enumerate(entries):
     lifespan = None
     m = re.match(r'^\(([^)]*)\)\s*', body)
     if m:
-        lifespan, body = m.group(1).strip(), body[m.end():]
+        lifespan, body = m.group(1).strip().replace(' B.C.', ' BCE'), body[m.end():]
     feast = None
     m = re.search(r'\s*\(((?:%s)\s+\d+|Easter Day)\)\s*$' % MONTHS, body)
     if m:

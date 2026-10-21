@@ -4,9 +4,16 @@ importScripts('../vendor/jsfeat-min.js', 'vision.js');
 
 self.onmessage = function (e) {
   var m = e.data;
-  if (m.type === 'ref') {
-    var n = Vision.addReference(m.id, new Uint8Array(m.gray), m.w, m.h);
-    self.postMessage({ type: 'ref-ok', id: m.id, keypoints: n });
+  if (m.type === 'refs') {
+    fetch(m.url).then(function (r) {
+      if (!r.ok) throw new Error(r.status);
+      return r.arrayBuffer();
+    }).then(function (buf) {
+      var n = Vision.loadPacked(m.meta, buf);
+      self.postMessage({ type: 'refs-ok', keypoints: n });
+    }).catch(function (err) {
+      self.postMessage({ type: 'refs-error', error: String(err) });
+    });
   } else if (m.type === 'frame') {
     var t0 = Date.now(), results = [];
     try { results = Vision.findInFrame(new Uint8ClampedArray(m.rgba), m.w, m.h, m.only); } catch (err) { /* skip frame */ }

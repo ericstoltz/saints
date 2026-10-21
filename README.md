@@ -22,25 +22,30 @@ Add `?mobile=1` to the address to force the phone layout on a laptop with a webc
 
 ## How the camera recognition works
 
-`js/vision.js` compares each camera frame with reference photos of the mural walls
-(`img/mural/*.jpg`) using image features (ORB) and works out where each wall is in the
-picture. `data/mural.js` lists where each face is on each reference photo, so the app can
-draw a circle around every face it can see. Everything runs on the phone. No images
-leave the device.
+`js/vision.js` compares each camera frame with reference photos of the mural using image
+features (ORB) and a perspective fit, so it copes with the phone being held at an angle.
+Each reference is a "view": one photo crop of a flat stretch of wall. Every face also gets
+its own close-up tile from the full-resolution photo, so a phone held close to one or two
+saints still finds them. Everything runs on the phone. No images leave the device.
 
-The reference photos are currently the small wall pictures from the brochure, which is
-enough for testing against a screen but not for the church. For the real thing:
+The features are computed ahead of time, so the phone only downloads `data/refs.bin`:
 
-1. Photograph each wall section from the floor, as sharp and straight-on as possible.
-   One photo per wall or section, in daylight with the usual lighting.
-2. Save each photo as `app/img/mural/<wall>.jpg` (for example `south.jpg`). Up to about
-   1600 pixels wide is plenty.
-3. Open `tools/hotspot-editor.html` in a browser (through the same local server, from the
-   `saints/` folder), load the photo, click each face and pick the saint.
-4. Copy the result into `app/data/mural.js`, replacing that wall's entry.
+1. Put the photo in `tools/photos/` (full resolution, straight from the phone).
+2. Add a view to `tools/views.json`: the crop box in photo pixels, the halo diameter in
+   pixels, and the center of each face with its saint id (from `app/data/saints.json`).
+3. Run `python3 tools/build_refs.py` (needs Python with Pillow, and Node). It writes
+   `app/data/mural.js` and `app/data/refs.bin`, and saves each view with its faces circled
+   in `tools/previews/` so you can check the positions.
 
-To add the apse painting of St. Gregory preaching, add a wall entry with
-`"banner": "apseBanner"` and no hotspots; the app then shows the caption whenever it sees it.
+Covered so far, from one photo: the southwest wall, part of the south wall, and John
+Coltrane (16 saints). The other walls need photos.
+
+Good reference photos: taken from the floor in normal lighting, sharp, with each stretch
+of wall filling most of the frame. Two photos per wall from different spots (left and right
+of center) make recognition work from more angles; close-ups of the upper row help too.
+
+To add the apse painting of St. Gregory preaching, add a view with `"banner": "apseBanner"`
+and no faces; the app then shows the caption whenever it sees it.
 
 ## Design
 
@@ -56,8 +61,8 @@ Styling follows `design.md` (taken from saintgregorys.org). Colors and fonts are
   same file names).
 
 `tools/extract.py` and `tools/build_data.py` regenerate the saint data from the brochure
-PDF; `tools/saints_es.py` writes the Spanish file; `tools/build_mural.py` builds
-`mural.js` from `tools/hotspots.brochure.json`.
+PDF; `tools/saints_es.py` writes the Spanish file. `tools/hotspots.brochure.json` records
+which saints the brochure shows on each wall, useful when marking faces on new photos.
 
 ## Third-party code
 

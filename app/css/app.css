@@ -252,6 +252,7 @@ body.is-camera.cam-live .topbar {
 }
 .saint-row::after { content: '›'; margin-left: auto; color: var(--accent); font-size: 1.5rem; line-height: 1; padding-right: 4px; }
 .thumb {
+  border-radius: 4px;
   width: 64px; height: 64px; flex: none; overflow: hidden;
   background: linear-gradient(100deg, #efe7c9 30%, #f8f2dc 50%, #efe7c9 70%) 0 0 / 300% 100%;
   animation: shimmer 1.4s linear infinite;
@@ -361,8 +362,7 @@ body.is-camera.cam-live .topbar {
 .profile__dates { text-align: center; color: var(--muted); margin: 0 0 18px; font-size: var(--fs-small); }
 .profile__dates::after { content: ''; display: block; width: 40px; height: 3px; margin: 14px auto 0; background: var(--sg-saffron); }
 .profile__bio { margin: 0 0 16px; }
-.profile__where { font-size: var(--fs-small); color: var(--muted); border-top: 1px solid var(--line); padding-top: 12px; }
-.profile__where strong { color: var(--ink); }
+.profile__feast { margin: 0 0 16px; text-align: center; font-variant: small-caps; letter-spacing: 0.04em; }
 .sheet__foot {
   flex: none; display: flex; align-items: center; justify-content: center; gap: 16px;
   padding: 12px var(--gutter) calc(var(--safe-b) + 14px); border-top: 1px solid var(--line); background: var(--sg-cream);

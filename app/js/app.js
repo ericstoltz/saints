@@ -38,7 +38,7 @@
     document.dispatchEvent(new CustomEvent('langchange'));
   }
 
-  // Spanish dates: months, centuries, "c.", "B.C."
+  // Spanish dates: months, centuries, "c.", "BCE"
   var MONTHS_ES = { January: 'enero', February: 'febrero', March: 'marzo', April: 'abril', May: 'mayo', June: 'junio',
     July: 'julio', August: 'agosto', September: 'septiembre', October: 'octubre', November: 'noviembre', December: 'diciembre' };
   var ROMAN = ['', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII', 'XIII', 'XIV', 'XV'];
@@ -53,7 +53,7 @@
     return d
       .replace(/(\d+)(?:st|nd|rd|th)–(\d+)(?:st|nd|rd|th)\? century/, function (_, a, b) { return 'siglos ' + ROMAN[+a] + '–' + ROMAN[+b] + '?'; })
       .replace(/(\d+)(?:st|nd|rd|th) century/, function (_, a) { return 'siglo ' + ROMAN[+a]; })
-      .replace(/B\.C\./g, 'a. C.').replace(/^reigned /, 'reinó ');
+      .replace(/BCE/g, 'a. e. c.').replace(/^reigned /, 'reinó ');
   }
   function saintText(s) {
     var es = lang === 'es' ? (ES[s.id] || {}) : {};
@@ -62,7 +62,6 @@
       bio: es.bio || s.bio,
       dates: es.lifespan || datesText(s.lifespan),
       feast: feastText(s.feast),
-      where: s.location ? (t('walls')[s.location] || s.location) : null
     };
   }
   window.DS = { byId: byId, t: t, saintText: saintText, openSheet: openSheet, isMobile: isMobile,
@@ -128,15 +127,15 @@
   }
 
   $('#intro-camera').addEventListener('click', function () {
-    hideIntro(); showShell();
+    hideIntro(); shell.hidden = false;
     if (location.hash === '#/camera') route(); else location.hash = '#/camera';
   });
   intro.addEventListener('click', function (e) {
     var a = e.target.closest('a[href^="#/"]');
-    if (a) { hideIntro(); showShell(); }
+    if (a) { hideIntro(); shell.hidden = false; if (a.getAttribute("href") === location.hash) route(); }
   });
 
-  function showShell() { shell.hidden = false; if (!location.hash || location.hash === '#/') route(); }
+  function showShell() { shell.hidden = false; route(); }
 
   // ---------- routing ----------
   var screens = { camera: '#screen-camera', browse: '#screen-browse', commentary: '#screen-commentary',
@@ -195,14 +194,20 @@
 
   // ---------- browse list ----------
   var list = $('#saint-list');
-  var sortedList = S.list.slice().sort(function (a, b) {
-    return byId[a.id].order - byId[b.id].order || (a.label === byId[a.id].name ? -1 : 1);
-  });
+  var sortedList = S.list.slice();
+  function shownName(e) {
+    var s = byId[e.id];
+    return e.label === s.name ? saintText(s).name : (t('memberNames')[e.label] || e.label);
+  }
 
   function renderList() {
+    // Alphabetical by first name, as the names are shown ("Anne Frank" under A).
+    sortedList.sort(function (a, b) {
+      return shownName(a).localeCompare(shownName(b), lang, { sensitivity: 'base' });
+    });
     list.innerHTML = sortedList.map(function (e) {
       var s = byId[e.id], tx = saintText(s);
-      var label = e.label === s.name ? tx.name : (t('memberNames')[e.label] || e.label);
+      var label = shownName(e);
       var names = [e.label, label, s.name, tx.name].concat(s.aliases);
       return '<li data-names="' + esc(names.join('|')) + '">' +
         '<button type="button" class="saint-row" data-id="' + s.id + '">' +
@@ -257,10 +262,10 @@
     $('#sheet-name').textContent = tx.name;
     $('#sheet-dates').textContent = tx.dates || '';
     $('#sheet-dates').hidden = !tx.dates;
-    $('#sheet-bio').innerHTML = tx.bio + (tx.feast ? ' <span class="profile__feast">(' + esc(tx.feast) + ')</span>' : '');
-    var where = $('#sheet-where');
-    where.hidden = !tx.where;
-    if (tx.where) where.innerHTML = '<strong>' + esc(t('onTheWall')) + ':</strong> ' + esc(tx.where);
+    $('#sheet-bio').innerHTML = tx.bio;
+    var feast = $('#sheet-feast');
+    feast.textContent = tx.feast ? t('celebratedOn').replace('{date}', tx.feast) : '';
+    feast.hidden = !tx.feast;
     var idx = browseIds().indexOf(id);
     $('#sheet-prev').disabled = idx <= 0;
     $('#sheet-next').disabled = idx < 0 || idx >= browseIds().length - 1;

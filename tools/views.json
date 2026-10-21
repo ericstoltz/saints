@@ -1,0 +1,108 @@
+{
+ "_about": "Mural reference views for camera recognition. Each view is a crop of a photo in tools/photos/ covering one flat stretch of wall. faces: saint id -> [x, y] center of the face in the ORIGINAL photo's pixels. halo: halo diameter in original pixels (sets tile and hotspot size). Rebuild with: python3 tools/build_refs.py",
+ "views": [
+  {
+   "id": "sw-1737",
+   "photo": "IMG_1737.jpg",
+   "box": [
+    1000,
+    1250,
+    4284,
+    3300
+   ],
+   "halo": 250,
+   "faces": {
+    "simone-weil": [
+     1585,
+     1445
+    ],
+    "liliuokalani": [
+     1872,
+     1466
+    ],
+    "andrei-rublev": [
+     2211,
+     1558
+    ],
+    "thurgood-marshall": [
+     2529,
+     1609
+    ],
+    "barnabas": [
+     1538,
+     2594
+    ],
+    "jalal-ad-din-rumi": [
+     1934,
+     2625
+    ],
+    "julian-of-norwich": [
+     2289,
+     2687
+    ],
+    "caspar-david-friedrich": [
+     2611,
+     2707
+    ],
+    "francis-of-assisi": [
+     3176,
+     2728
+    ],
+    "m-m-thomas": [
+     3607,
+     2523
+    ],
+    "anne-frank": [
+     3262,
+     1650
+    ]
+   }
+  },
+  {
+   "id": "s-1737",
+   "photo": "IMG_1737.jpg",
+   "box": [
+    0,
+    0,
+    1250,
+    2000
+   ],
+   "halo": 280,
+   "faces": {
+    "theosebia": [
+     320,
+     410
+    ],
+    "lucy-wright": [
+     720,
+     860
+    ],
+    "martha-graham": [
+     1015,
+     1156
+    ],
+    "gregory-of-nyssa": [
+     75,
+     112
+    ]
+   }
+  },
+  {
+   "id": "coltrane-1737",
+   "photo": "IMG_1737.jpg",
+   "box": [
+    0,
+    2450,
+    760,
+    4300
+   ],
+   "halo": 260,
+   "faces": {
+    "john-coltrane": [
+     520,
+     2700
+    ]
+   }
+  }
+ ]
+}
