@@ -40,7 +40,7 @@
     $$('[data-lang]').forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.lang === l)); });
     renderProse();
     renderList();
-    if (sheetState.id) fillSheet(sheetState.id);
+    if (sheetState.id) fillSheet(sheetState.id, sheetState.member);
     document.dispatchEvent(new CustomEvent('langchange'));
   }
 
@@ -209,9 +209,14 @@
     return e.label === s.name ? saintText(s).name : (t('memberNames')[e.label] || e.label);
   }
 
-  // Small list pictures; Nellie and Dorothy Lincoln each have their own portrait.
-  var MEMBER_THUMBS = { 'Nellie Lincoln': 'nellie-lincoln', 'Dorothy Lincoln': 'dorothy-lincoln' };
-  function thumbOf(e) { return 'img/saints/thumbs/' + (MEMBER_THUMBS[e.label] || e.id) + '.jpg?v=' + CONFIG.version; }
+  // Paired saints: each has a portrait of their own. A pair's row and profile slowly dissolve
+  // between the two portraits.
+  var MEMBER_IMG = { 'Nellie Lincoln': 'nellie-lincoln', 'Dorothy Lincoln': 'dorothy-lincoln', 'Sergius': 'sergius', 'Bacchus': 'bacchus' };
+  function thumbOf(e) { return 'img/saints/thumbs/' + (MEMBER_IMG[e.label] || e.id) + '.jpg?v=' + CONFIG.version; }
+  function pairImages(s, dir) {
+    var ims = s.members.map(function (m) { return MEMBER_IMG[m]; });
+    return ims.length === 2 && ims[0] && ims[1] ? ims.map(function (f) { return 'img/saints/' + dir + f + '.jpg?v=' + CONFIG.version; }) : null;
+  }
 
   function renderList() {
     // Alphabetical by first name, as the names are shown ("Anne Frank" under A).
@@ -222,9 +227,13 @@
       var s = byId[e.id], tx = saintText(s);
       var label = shownName(e);
       var names = [e.label, label, s.name, tx.name].concat(s.aliases);
+      var member = e.label !== s.name && MEMBER_IMG[e.label], pair = e.label === s.name && pairImages(s, 'thumbs/');
+      var thumb = pair
+        ? '<span class="thumb thumb--pair"><img data-src="' + pair[0] + '" alt="" width="60" height="60"><img class="dissolve" data-src="' + pair[1] + '" alt="" width="60" height="60"></span>'
+        : '<span class="thumb"><img data-src="' + thumbOf(e) + '" alt="" width="60" height="60"></span>';
       return '<li data-names="' + esc(names.join('|')) + '">' +
-        '<button type="button" class="saint-row" data-id="' + s.id + '">' +
-        '<span class="thumb"><img data-src="' + thumbOf(e) + '" alt="" width="60" height="60"></span>' +
+        '<button type="button" class="saint-row" data-id="' + s.id + '"' + (member ? ' data-member="' + esc(e.label) + '"' : '') + '>' +
+        thumb +
         '<span class="saint-row__text"><span class="saint-row__name">' + esc(label) + '</span>' +
         (tx.dates ? '<span class="saint-row__dates">' + esc(tx.dates) + '</span>' : '') +
         '</span></button></li>';
@@ -252,7 +261,7 @@
 
   list.addEventListener('click', function (e) {
     var b = e.target.closest('.saint-row');
-    if (b) openSheet(b.dataset.id, { browse: true, opener: b });
+    if (b) openSheet(b.dataset.id, { browse: true, opener: b, member: b.dataset.member });
   });
 
   var filter = $('#filter');
@@ -273,12 +282,16 @@
   var sheet = $('#sheet');
   var sheetState = { id: null, browse: false, opener: null, onClose: null };
 
-  function fillSheet(id) {
+  function fillSheet(id, member) {
     var s = byId[id], tx = saintText(s);
-    var img = $('#sheet-img');
-    img.src = s.image + '?v=' + CONFIG.version; img.alt = tx.name;
-    img.classList.toggle('is-mural', s.kind === 'mural');
-    $('#sheet-name').textContent = tx.name;
+    member = member && MEMBER_IMG[member] ? member : null;
+    var img = $('#sheet-img'), img2 = $('#sheet-img2'), pair = !member && pairImages(s, '');
+    img.src = member ? 'img/saints/' + MEMBER_IMG[member] + '.jpg?v=' + CONFIG.version : pair ? pair[0] : s.image + '?v=' + CONFIG.version;
+    img2.hidden = !pair; if (pair) img2.src = pair[1];
+    img.parentNode.classList.toggle('is-mural', s.kind === 'mural');
+    var name = member ? (t('memberNames')[member] || member) : tx.name;
+    img.alt = name;
+    $('#sheet-name').textContent = name;
     $('#sheet-dates').textContent = tx.dates || '';
     $('#sheet-dates').hidden = !tx.dates;
     $('#sheet-bio').innerHTML = tx.bio;
@@ -302,9 +315,9 @@
   var sheetTimer = 0;
   function openSheet(id, opts) {
     opts = opts || {};
-    sheetState = { id: id, browse: !!opts.browse, opener: opts.opener || document.activeElement, onClose: opts.onClose || null };
+    sheetState = { id: id, member: opts.member || null, browse: !!opts.browse, opener: opts.opener || document.activeElement, onClose: opts.onClose || null };
     sheet.classList.toggle('is-browse', sheetState.browse);
-    fillSheet(id);
+    fillSheet(id, sheetState.member);
     if (!sheet.open) {
       if (sheet.showModal) sheet.showModal(); else sheet.setAttribute('open', '');
       requestAnimationFrame(function () { requestAnimationFrame(function () { sheet.classList.add('is-open'); }); });
@@ -338,7 +351,7 @@
   sheet.addEventListener('click', function (e) { if (e.target === sheet) closeSheet(); });
   function step(d) {
     var ids = browseIds(), i = ids.indexOf(sheetState.id) + d;
-    if (i >= 0 && i < ids.length) { sheetState.id = ids[i]; fillSheet(ids[i]); }
+    if (i >= 0 && i < ids.length) { sheetState.id = ids[i]; sheetState.member = null; fillSheet(ids[i]); }
   }
   $('#sheet-prev').addEventListener('click', function () { step(-1); });
   $('#sheet-next').addEventListener('click', function () { step(1); });

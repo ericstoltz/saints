@@ -261,7 +261,6 @@ body.is-camera.cam-live .topbar {
 .saint-list li.saint-list__head, .saint-list li.saint-list__head + li { border-top: 0; }
 .profile__dates[hidden] + .profile__bio { margin-top: 18px; }
 .profile__source { display: block; margin-top: 14px; font-size: var(--fs-small); color: var(--muted); }
-.profile__img.is-mural { aspect-ratio: auto; height: auto; width: 80%; max-width: 360px; object-fit: contain; }
 .saint-row {
   width: 100%; display: flex; align-items: center; gap: 14px; padding: 10px 0;
   background: none; border: 0; text-align: left; cursor: pointer;
@@ -386,7 +385,17 @@ html.sheet-open .page { visibility: hidden; }
 .sheet__grip { width: 44px; height: 5px; border-radius: 3px; background: #d8cfae; margin: 10px auto 0; flex: none; }
 .sheet__close { position: absolute; top: 8px; right: 8px; color: var(--ink); z-index: 2; background: var(--sg-cream); border-radius: 50%; }
 .sheet__scroll { flex: 1 1 auto; min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; padding: 14px calc(var(--gutter) + 18px) 16px; }
-.profile__img { display: block; width: 60%; max-width: 260px; aspect-ratio: 1; object-fit: cover; margin: 10px auto 20px; background: #efe7c9; border-radius: 8px; }
+.profile__media { position: relative; width: 60%; max-width: 260px; margin: 10px auto 20px; }
+.profile__img { display: block; width: 100%; height: auto; aspect-ratio: 1; object-fit: cover; background: #efe7c9; border-radius: 8px; }
+.profile__media .dissolve { position: absolute; inset: 0; height: 100%; }
+.profile__media.is-mural { width: 80%; max-width: 360px; }
+.profile__media.is-mural .profile__img { aspect-ratio: auto; object-fit: contain; }
+/* Paired saints: the second portrait slowly fades in over the first and out again. */
+.dissolve { animation: dissolve 10s ease-in-out infinite; }
+@keyframes dissolve { 0%, 35% { opacity: 0; } 50%, 85% { opacity: 1; } 100% { opacity: 0; } }
+.thumb--pair { position: relative; }
+.thumb--pair img.dissolve { position: absolute; inset: 0; }
+.thumb.is-loaded img.dissolve { opacity: 0; animation: dissolve 10s ease-in-out infinite; }
 .profile__name { text-align: center; margin-bottom: 4px; }
 .profile__dates { text-align: center; color: var(--muted); margin: 0 0 18px; font-size: var(--fs-small); }
 .profile__dates::after { content: ''; display: block; width: 40px; height: 3px; margin: 14px auto 0; background: var(--sg-saffron); }
@@ -401,5 +410,6 @@ html.sheet-open .page { visibility: hidden; }
 .sheet:not(.is-browse) #sheet-prev, .sheet:not(.is-browse) #sheet-next { display: none; }
 
 @media (prefers-reduced-motion: reduce) {
+  .dissolve, .thumb.is-loaded img.dissolve { animation: none !important; opacity: 0 !important; }
   *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
 }
