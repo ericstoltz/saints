@@ -29,8 +29,11 @@ The camera names saints in two ways, and uses both at once.
 `js/face-worker.js` finds painted faces in the camera picture and names each one by comparing it
 with the saints' portraits, one straight-on portrait per saint. No wall photos are needed.
 
-- A face finder (`models/blazeface.onnx`, MediaPipe BlazeFace full range, Apache 2.0) draws a
-  circle on every face it finds.
+- A face finder (`models/blazeface.onnx`, MediaPipe BlazeFace full range, Apache 2.0) looks for
+  faces in every frame. It also fires on robes, hands, feet and animals now and then, so each new
+  spot is checked: a second copy of the worker embeds it (below) and the circle shows only if it
+  looks enough like some saint's portrait (`faceMinSim` in `js/config.js`). Spots the finder is
+  very sure of show right away while their check waits its turn.
 - When a face is tapped, it and its nearest neighbours are cut from the full-size picture and
   turned into image embeddings by `models/siglip.onnx` (Google's SigLIP B/16 image encoder,
   Apache 2.0, 4-bit, 55 MB, downloaded in the background when the camera opens).

@@ -10,6 +10,9 @@ ort.env.wasm.wasmPaths = new URL('../vendor/ort/', self.location.href).href;
 ort.env.wasm.numThreads = self.crossOriginIsolated ? Math.min(4, navigator.hardwareConcurrency || 1) : 1;
 
 var V = self.location.search;
+// Two copies of this worker run side by side: one finds faces in every frame (role=find), the
+// other checks and names them (role=name), so the slow naming model never holds up the circles.
+var ROLE = /[?&]role=name\b/.test(V) ? 'name' : 'find';
 var det = null, enc = null, encLoading = null, P = null;   // P: portrait embeddings (Float32Array rows)
 var F = self.FACES;
 
@@ -119,7 +122,14 @@ function halfToFloat(h) {
 var SAINTS = [], ROWS = {};
 F.rows.forEach(function (id, r) { if (!ROWS[id]) { ROWS[id] = []; SAINTS.push(id); } ROWS[id].push(r); });
 
-function embed(crops) {   // crops: array of Uint8ClampedArray RGBA (size x size)
+// One encoder run at a time: checks of new circles and naming a tapped face share it.
+var encQueue = Promise.resolve();
+function embed(crops) {
+  var job = encQueue.then(function () { return embedNow(crops); });
+  encQueue = job.catch(function () {});
+  return job;
+}
+function embedNow(crops) {   // crops: array of Uint8ClampedArray RGBA (size x size)
   var n = crops.length, S = F.crop.size, x = new Float32Array(n * S * S * 3);
   crops.forEach(function (c, k) {
     for (var i = 0, o = k * S * S * 3; i < S * S; i++) { x[o++] = c[i * 4]; x[o++] = c[i * 4 + 1]; x[o++] = c[i * 4 + 2]; }
@@ -211,8 +221,17 @@ function identify(m) {
   });
 }
 
+// How much each crop looks like any saint's portrait (best cosine similarity). Robes, hands,
+// feet and animals that the face finder mistakes for faces score well below painted faces.
+function verify(m) {
+  return loadEncoder().then(function () { return embed(m.crops); }).then(function (E) {
+    var B = scoreAll(E, m.crops.length);
+    return B.map(function (row) { var b = -2; for (var i = 0; i < row.length; i++) if (row[i] > b) b = row[i]; return b; });
+  });
+}
+
 // ---------- messages ----------
-var ready = loadDetector().then(function () { postMessage({ type: 'face-ready' }); },
+var ready = ROLE === 'name' ? Promise.resolve() : loadDetector().then(function () { postMessage({ type: 'face-ready' }); },
   function (e) { postMessage({ type: 'face-error', error: String(e) }); });
 
 onmessage = function (e) {
@@ -222,7 +241,11 @@ onmessage = function (e) {
       .then(function (faces) { postMessage({ type: 'faces', faces: faces, w: m.w, rgba: m.rgba }, [m.rgba]); },
         function (err) { postMessage({ type: 'faces', faces: [], w: m.w, rgba: m.rgba, error: String(err) }, [m.rgba]); });
   } else if (m.type === 'warm') {
-    loadEncoder().catch(function () {});
+    loadEncoder().then(function () { postMessage({ type: 'encoder-ready' }); },
+      function (err) { postMessage({ type: 'encoder-error', error: String(err) }); });
+  } else if (m.type === 'verify') {
+    verify(m).then(function (sims) { postMessage({ type: 'verified', token: m.token, sims: sims }); },
+      function (err) { postMessage({ type: 'verified', token: m.token, error: String(err) }); });
   } else if (m.type === 'identify') {
     identify(m).then(function (r) { r.type = 'identity'; r.token = m.token; postMessage(r); },
       function (err) { postMessage({ type: 'identity', token: m.token, error: String(err) }); });

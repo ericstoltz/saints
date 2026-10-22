@@ -20,7 +20,9 @@
   var spare = null;     // recycled frame buffer
   var selected = null;  // {id, x, y, r}
   // Face finder (js/face-worker.js): circles any painted face, and names it from the portraits on tap.
-  var faceWorker = null, faceBusy = false, faceRound = 0, faceSpare = null, faceSeq = 0;
+  var faceWorker = null, nameWorker = null, faceBusy = false, faceRound = 0, faceSpare = null, faceSeq = 0;
+  // Each new circle is checked against the portraits before it shows (see verifyPending).
+  var encReady = false, encFailed = false, verifyBusy = false, verifyToken = 0, verifyIds = [];
   var identity = null, identToken = 0, onIdentity = null;
   var faceCanvas = document.createElement('canvas'), fctx = faceCanvas.getContext('2d', { willReadFrequently: true });
 
@@ -39,15 +41,30 @@
   }
   function initFaceWorker() {
     if (faceWorker || typeof WebAssembly !== 'object') return;
-    faceWorker = new Worker('js/face-worker.js?v=' + CONFIG.version);
+    faceWorker = new Worker('js/face-worker.js?v=' + CONFIG.version + '&role=find');
     faceWorker.onmessage = onFaceWorker;
-    faceWorker.postMessage({ type: 'warm' });   // start fetching the naming model in the background
+    nameWorker = new Worker('js/face-worker.js?v=' + CONFIG.version + '&role=name');
+    nameWorker.onmessage = onFaceWorker;
+    nameWorker.postMessage({ type: 'warm' });   // start fetching the naming model in the background
   }
   function onFaceWorker(e) {
     var m = e.data;
     if (m.type === 'faces') {
       faceBusy = false; faceSpare = m.rgba;
       if (running && !frozen) handleFaces(m.faces, m.w);
+    } else if (m.type === 'encoder-ready') {
+      encReady = true; verifyPending();
+    } else if (m.type === 'encoder-error') {
+      encFailed = true; updateStale();
+    } else if (m.type === 'verified' && m.token === verifyToken) {
+      verifyBusy = false;
+      if (m.error) { encFailed = true; } else {
+        verifyIds.forEach(function (id, i) {
+          var sp = spots[id];
+          if (sp) { sp.sim = m.sims[i]; sp.ok = m.sims[i] >= CONFIG.faceMinSim; }
+        });
+      }
+      updateStale(); verifyPending();
     } else if (m.type === 'identity' && m.token === identToken) {
       identity = m.error ? { error: m.error } : m;
       if (onIdentity) { var f = onIdentity; onIdentity = null; f(); }
@@ -190,9 +207,42 @@
       if (near && near.charAt(0) !== '~') { if (now - spots[near].seen < 1500) return; }
       var id = near || ('~' + (++faceSeq));
       placeSpot(id, sc.x, sc.y, r, now);
-      var s = spots[id]; s.face = { x: f.x, y: f.y, w: f.w, aw: aw };
+      var s = spots[id]; s.face = { x: f.x, y: f.y, w: f.w, aw: aw, score: f.score };
+      s.hits = (s.hits || 0) + 1; s.best = Math.max(s.best || 0, f.score);
     });
+    verifyPending();
     updateStale();
+  }
+
+  // The face finder also circles robes, hands, feet and the wolf now and then. Before a circle
+  // shows, its face is compared with the saints' portraits; a poor match keeps it hidden.
+  function verifyPending() {
+    if (!nameWorker || !encReady || encFailed || verifyBusy || frozen || !running) return;
+    var now = Date.now(), cx = screen.clientWidth / 2, cy = screen.clientHeight / 2;
+    // first circles still hidden, then shown ones not yet checked, then a second look at rejected ones
+    function rank(sp) { return sp.ok === false ? 2 : sureFace(sp) ? 1 : 0; }
+    var ids = Object.keys(spots).filter(function (id) {
+      var sp = spots[id];
+      return id.charAt(0) === '~' && sp.face && now - sp.seen < 600 &&
+        (sp.ok === undefined || (sp.ok === false && now - sp.vAt > 8000));
+    }).sort(function (a, b) {
+      return rank(spots[a]) - rank(spots[b]) ||
+        Math.hypot(spots[a].x - cx, spots[a].y - cy) - Math.hypot(spots[b].x - cx, spots[b].y - cy);
+    }).slice(0, 1);   // one at a time, so circles appear one by one, nearest the middle first
+    if (!ids.length) return;
+    ids.forEach(function (id) { spots[id].vAt = now; });
+    var crops = cropFaces(ids.map(function (id) { return spots[id].face; }));
+    verifyBusy = true; verifyIds = ids; verifyToken++;
+    nameWorker.postMessage({ type: 'verify', token: verifyToken, crops: crops }, crops.map(function (c) { return c.buffer; }));
+  }
+
+  // Should this face circle show? A checked one shows if it passed. An unchecked one shows
+  // only if the face finder is confident and has seen it more than once (on the test photos,
+  // every spot that confident was a face); the rest wait for their check.
+  function sureFace(s) { return s.face && s.best >= 0.75 && s.hits >= 2; }
+  function faceShown(s) {
+    if (s.ok !== undefined && !encFailed) return s.ok;
+    return sureFace(s);
   }
 
   function dropFacesNear(x, y, r) {
@@ -226,7 +276,27 @@
     Object.keys(spots).forEach(function (id) {
       var s = spots[id], stale = now - s.seen > (id.charAt(0) === '~' ? 2500 : CONFIG.holdMs);
       s.el.classList.toggle('is-stale', stale);
-      if (now - s.seen > 4000) { s.el.remove(); delete spots[id]; } else if (!stale) any = true;
+      if (now - s.seen > 4000) { s.el.remove(); delete spots[id]; }
+    });
+    // Hide face circles that wait for their check, failed it, or sit on top of a better one.
+    var shown = [];
+    Object.keys(spots).forEach(function (id) {
+      var s = spots[id], hide = id.charAt(0) === '~' && !faceShown(s);
+      if (!hide && id.charAt(0) === '~') shown.push(s);
+      s.el.classList.toggle('is-pending', hide);
+    });
+    shown.sort(function (a, b) { return (b.sim || b.face.score) - (a.sim || a.face.score); });
+    shown.forEach(function (s, i) {
+      for (var j = 0; j < i; j++) {
+        var o = shown[j];
+        if (!o.el.classList.contains('is-pending') && Math.hypot(o.x - s.x, o.y - s.y) < 0.7 * Math.max(o.r, s.r)) {
+          s.el.classList.add('is-pending'); break;
+        }
+      }
+    });
+    Object.keys(spots).forEach(function (id) {
+      var c = spots[id].el.classList;
+      if (!c.contains('is-stale') && !c.contains('is-pending')) any = true;
     });
     var showBanner = banner.key && now - banner.seen < CONFIG.holdMs + 600;
     bannerEl.hidden = !showBanner || frozen;
@@ -249,25 +319,28 @@
   var cropCanvas = document.createElement('canvas'), cctx = cropCanvas.getContext('2d', { willReadFrequently: true });
   function startIdentify(sel) {
     identity = null; onIdentity = null; identToken++;
-    if (!faceWorker || !sel.face) { identity = { error: 'no face' }; return; }
-    var vw = video.videoWidth, k = vw / sel.face.aw, size = 224;
+    if (!nameWorker || !sel.face) { identity = { error: 'no face' }; return; }
     var others = Object.keys(spots).map(function (id) { return spots[id]; }).filter(function (s) {
-      return s.face && s.face !== sel.face && Date.now() - s.seen < 3000 &&
+      return s.face && s.face !== sel.face && s.ok !== false && Date.now() - s.seen < 3000 &&
         Math.hypot(s.face.x - sel.face.x, s.face.y - sel.face.y) < 5 * Math.max(s.face.w, sel.face.w);
     }).sort(function (a, b) {
       return Math.hypot(a.face.x - sel.face.x, a.face.y - sel.face.y) - Math.hypot(b.face.x - sel.face.x, b.face.y - sel.face.y);
     }).map(function (s) { return s.face; }).slice(0, 4);
-    var list = [sel.face].concat(others);
+    var list = [sel.face].concat(others), crops = cropFaces(list), k = video.videoWidth / sel.face.aw;
+    nameWorker.postMessage({ type: 'identify', token: identToken, crops: crops,
+      faces: list.map(function (f) { return { x: f.x * k, y: f.y * k, w: f.w * k }; }) },
+      crops.map(function (c) { return c.buffer; }));
+  }
+  // Square crops around faces from the full-size picture, framed like the portrait crops.
+  function cropFaces(list) {
+    var size = 224;
     cropCanvas.width = cropCanvas.height = size;
-    var crops = list.map(function (f) {
-      var side = f.w * 1.8 * k, cx = f.x * k, cy = (f.y - 0.12 * f.w) * k;
+    return list.map(function (f) {
+      var k = video.videoWidth / f.aw, side = f.w * 1.8 * k, cx = f.x * k, cy = (f.y - 0.12 * f.w) * k;
       cctx.fillStyle = '#000'; cctx.fillRect(0, 0, size, size);
       cctx.drawImage(video, cx - side / 2, cy - side / 2, side, side, 0, 0, size, size);
       return cctx.getImageData(0, 0, size, size).data;
     });
-    faceWorker.postMessage({ type: 'identify', token: identToken, crops: crops,
-      faces: list.map(function (f) { return { x: f.x * k, y: f.y * k, w: f.w * k }; }) },
-      crops.map(function (c) { return c.buffer; }));
   }
   // Run fn once the name is known (shows "Looking closely" meanwhile).
   function whenIdentified(fn) {

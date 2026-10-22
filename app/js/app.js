@@ -11,6 +11,12 @@
     (navigator.maxTouchPoints > 1 && /Macintosh/.test(navigator.userAgent))) &&
     !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia));
 
+  // Focus rings only for keyboard use (see .kbd in css/app.css).
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Tab' || e.key.indexOf('Arrow') === 0) document.documentElement.classList.add('kbd');
+  }, true);
+  document.addEventListener('pointerdown', function () { document.documentElement.classList.remove('kbd'); }, true);
+
   var byId = {};
   S.saints.forEach(function (s) { byId[s.id] = s; });
 
