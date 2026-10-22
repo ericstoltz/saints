@@ -4,6 +4,7 @@ window.CONTENT = {
   en: {
     appName: 'The Dancing Saints',
     church: 'St. Gregory of Nyssa Episcopal Church, San Francisco',
+    churchName: 'Saint Gregory of Nyssa Episcopal Church',
     loadingQuote: 'The one thing truly worthwhile is becoming God’s friend.',
     loadingQuoteBy: 'Gregory of Nyssa, 395 CE',
     chooseLanguage: 'Choose your language',
@@ -91,6 +92,7 @@ window.CONTENT = {
   es: {
     appName: 'Los Santos Danzantes',
     church: 'Iglesia Episcopal de San Gregorio de Nisa, San Francisco',
+    churchName: 'Iglesia Episcopal de San Gregorio de Nisa',
     loadingQuote: 'Lo único que verdaderamente vale la pena es llegar a ser amigo de Dios.',
     loadingQuoteBy: 'Gregorio de Nisa, 395 d. C.',
     chooseLanguage: 'Elige tu idioma',

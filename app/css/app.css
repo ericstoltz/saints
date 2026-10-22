@@ -240,7 +240,8 @@ body.is-camera.cam-live .topbar {
 }
 .menu li a::after { content: '›'; color: var(--sg-teal); font-size: 1.5rem; line-height: 1; }
 .menu li a[aria-current="page"] { font-weight: 600; color: var(--sg-teal); }
-.menu__foot { margin-top: auto; color: var(--muted); font-size: var(--fs-small); }
+.menu__foot { margin-top: auto; color: var(--muted); font-size: var(--fs-small); line-height: 1.5; }
+.menu__foot a { color: inherit; }
 
 .page { background: var(--sg-bg-soft); background-color: var(--sg-cream); min-height: calc(100vh - 57px); }
 .page__inner { max-width: var(--reading); margin: 0 auto; padding: 28px var(--gutter) calc(var(--safe-b) + 56px); }
