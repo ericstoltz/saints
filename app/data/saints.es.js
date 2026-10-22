@@ -297,6 +297,10 @@ window.SAINTS_ES = {
  "wang-zhiming": {
   "bio": "Mártir de la Iglesia en China. Educado en escuelas misioneras y ordenado en 1951, Wang fue pastor de los cristianos del condado de Wuding, en Yunnan, su tierra natal. Durante la Revolución Cultural se opuso a las persecuciones ateas de los Guardias Rojos; fue arrestado en 1969 y ejecutado en un mitin masivo en 1973. Es recordado con reverencia en Wuding, donde hoy hay unos 30 000 cristianos y más de 100 lugares de culto."
  },
+ "jesus": {
+  "name": "Jesús, el Señor de la Danza",
+  "bio": "Texto próximamente."
+ },
  "song-of-songs": {
   "name": "Gregorio de Nisa: El Cantar de los Cantares",
   "bio": "Detrás de la sede de los predicadores en St Gregory’s se alza el icono de las bodas de Cristo y el Alma, tomado del comentario de Gregorio al Cantar de los Cantares, obra que sustenta gran parte de la literatura espiritual cristiana clásica. La novia de piel oscura de las Escrituras representa a todo ser humano. Su suegra extiende brazos amorosos para bendecir el matrimonio, mientras que abajo Gregorio enseña el sentido más profundo de la escena y nos dice que esta suegra amorosa representa a Dios, que no está ligado a ningún género humano. Detrás de estas figuras se alza nuestro templo, con un dosel que ondea en lo alto: un signo tradicional de que estas bodas espirituales, y en verdad todas estas maravillas, suceden realmente durante nuestra liturgia en nuestra iglesia. Como Moisés, aquí nos detenemos y vemos a Dios en carne humana; nuestra es el alma con la que Cristo se desposa; somos los invitados que se alimentan en su banquete de bodas; somos los danzantes que se enlazan con toda la humanidad a imagen de Dios; somos los que bautizan y el pueblo bautizado para la misión de Dios; y, unidos a los santos que giran en lo alto, estamos llegando a ser amigos de Dios.<span class=\"profile__source\">De <em>Worship at St Gregory’s</em>, de Rick Fabian</span>"

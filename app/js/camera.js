@@ -186,7 +186,6 @@
         var sc = toScreen(c, aw);
         var rad = (Math.hypot(e.x - c.x, e.y - c.y) + Math.hypot(e2.x - c.x, e2.y - c.y)) / 2 * sc.scale;
         if (sc.x < -rad || sc.y < -rad || sc.x > cw + rad || sc.y > ch + rad || !isFinite(rad)) return;
-        if (h.saint === 'jesus') { banner = { key: 'jesusBanner', seen: now }; return; }
         // several faces can open one profile (the apse mural): 'id', 'id#1', 'id#2', ...
         var n = seenSaint[h.saint] = (seenSaint[h.saint] || 0) + 1;
         placeSpot(n > 1 ? h.saint + '#' + (n - 1) : h.saint, sc.x, sc.y, Math.max(36, rad), now);
@@ -441,10 +440,7 @@
 
   function reveal(id) {
     id = id || selected.id;
-    if (!DS.byId[id]) {   // Jesus has no profile: show the caption instead
-      unfreeze(); if (id === 'jesus') { banner = { key: 'jesusBanner', seen: Date.now() + 3000 }; updateStale(); }
-      return;
-    }
+    if (!DS.byId[id]) { unfreeze(); return; }
     tray.hidden = true;
     DS.openSheet(id, { onClose: function () { unfreeze(); } });
   }
@@ -455,7 +451,9 @@
 
   function entries() {
     var out = [];
-    window.SAINTS.list.forEach(function (l) {
+    var extra = window.SAINTS.saints.filter(function (s) { return s.kind === 'mural'; })
+      .map(function (s) { return { id: s.id, label: s.name }; });
+    window.SAINTS.list.concat(extra).forEach(function (l) {
       var s = DS.byId[l.id], es = (window.SAINTS_ES || {})[l.id] || {};
       var names = [l.label];
       if (l.label === s.name) names = names.concat(s.aliases, es.name ? [es.name] : []);

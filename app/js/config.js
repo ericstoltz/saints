@@ -11,5 +11,5 @@ window.CONFIG = {
   // How long hotspots stay on screen after the mural is lost (ms).
   holdMs: 700,
   // Bump with each release so phones fetch fresh pictures and data instead of cached ones.
-  version: '20261022g'
+  version: '20261022h'
 };

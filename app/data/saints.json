@@ -1366,6 +1366,25 @@
    "members": []
   },
   {
+   "id": "jesus",
+   "name": "Jesus, the Lord of the Dance",
+   "kind": "mural",
+   "numbers": [],
+   "location": "Above the altar",
+   "lifespan": null,
+   "feast": null,
+   "bio": "Text to come.",
+   "image": "img/saints/jesus.jpg",
+   "order": 999,
+   "aliases": [
+    "Jesus",
+    "Christ",
+    "Lord of the Dance",
+    "Dancing Christ"
+   ],
+   "members": []
+  },
+  {
    "id": "song-of-songs",
    "name": "Gregory of Nyssa: The Song of Songs",
    "kind": "mural",

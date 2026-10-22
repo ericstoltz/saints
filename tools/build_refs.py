@@ -122,8 +122,6 @@ if P:
         W, H = view.size; fx, fy = P['faces'].get(f, P['face'])
         raw = os.path.join(tmp, 'p-' + f + '.png'); view.convert('L').save(raw)
         jobs.append({'file': raw, 'kind': 'portrait', 'view': 'p-' + f, 'w': W, 'h': H})
-        if sid == 'jesus':
-            views.append({'id': 'p-' + f, 'w': W, 'h': H, 'hotspots': [], 'banner': 'jesusBanner'}); continue
         views.append({'id': 'p-' + f, 'w': W, 'h': H, 'hotspots': [{'saint': sid, 'x': fx, 'y': fy, 'r': P['r']}]})
 # convert pngs to raw gray for node
 for j in jobs:
