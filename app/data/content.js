@@ -2,7 +2,7 @@
  * Spanish is a draft and needs review by a fluent reader. */
 window.CONTENT = {
   en: {
-    appName: 'Dancing Saints',
+    appName: 'The Dancing Saints',
     church: 'St. Gregory of Nyssa Episcopal Church, San Francisco',
     loadingQuote: 'The one thing truly worthwhile is becoming God’s friend.',
     loadingQuoteBy: 'Gregory of Nyssa, 395 CE',
@@ -88,7 +88,7 @@ window.CONTENT = {
   },
 
   es: {
-    appName: 'Dancing Saints',
+    appName: 'Los Santos Danzantes',
     church: 'Iglesia Episcopal de San Gregorio de Nisa, San Francisco',
     loadingQuote: 'Lo único que verdaderamente vale la pena es llegar a ser amigo de Dios.',
     loadingQuoteBy: 'Gregorio de Nisa, 395 d. C.',
