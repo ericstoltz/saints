@@ -212,6 +212,7 @@
   // Paired saints: each has a portrait of their own. A pair's row and profile slowly dissolve
   // between the two portraits.
   var MEMBER_IMG = { 'Nellie Lincoln': 'nellie-lincoln', 'Dorothy Lincoln': 'dorothy-lincoln', 'Sergius': 'sergius', 'Bacchus': 'bacchus' };
+  var MEMBER_DATES = { 'Nellie Lincoln': '1862–1956' };   // from her profile text
   function thumbOf(e) { return 'img/saints/thumbs/' + (MEMBER_IMG[e.label] || e.id) + '.jpg?v=' + CONFIG.version; }
   function pairImages(s, dir) {
     var ims = s.members.map(function (m) { return MEMBER_IMG[m]; });
@@ -235,7 +236,7 @@
         '<button type="button" class="saint-row" data-id="' + s.id + '"' + (member ? ' data-member="' + esc(e.label) + '"' : '') + '>' +
         thumb +
         '<span class="saint-row__text"><span class="saint-row__name">' + esc(label) + '</span>' +
-        (tx.dates ? '<span class="saint-row__dates">' + esc(tx.dates) + '</span>' : '') +
+        ((MEMBER_DATES[e.label] || tx.dates) ? '<span class="saint-row__dates">' + esc(MEMBER_DATES[e.label] || tx.dates) + '</span>' : '') +
         '</span></button></li>';
     }
     list.innerHTML = sortedList.map(row).join('') +
@@ -292,8 +293,9 @@
     var name = member ? (t('memberNames')[member] || member) : tx.name;
     img.alt = name;
     $('#sheet-name').textContent = name;
-    $('#sheet-dates').textContent = tx.dates || '';
-    $('#sheet-dates').hidden = !tx.dates;
+    var dates = (member && MEMBER_DATES[member]) || tx.dates;
+    $('#sheet-dates').textContent = dates || '';
+    $('#sheet-dates').hidden = !dates;
     $('#sheet-bio').innerHTML = tx.bio;
     var feast = $('#sheet-feast');
     feast.textContent = tx.feast ? t('celebratedOn').replace('{date}', tx.feast) : '';
