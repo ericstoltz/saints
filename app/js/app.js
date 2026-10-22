@@ -201,6 +201,9 @@
   // ---------- browse list ----------
   var list = $('#saint-list');
   var sortedList = S.list.slice();
+  // Other iconography (the apse mural): after the saints, under its own heading.
+  var extraList = S.saints.filter(function (s) { return s.kind === 'mural'; })
+    .map(function (s) { return { label: s.name, id: s.id }; });
   function shownName(e) {
     var s = byId[e.id];
     return e.label === s.name ? saintText(s).name : (t('memberNames')[e.label] || e.label);
@@ -215,7 +218,7 @@
     sortedList.sort(function (a, b) {
       return shownName(a).localeCompare(shownName(b), lang, { sensitivity: 'base' });
     });
-    list.innerHTML = sortedList.map(function (e) {
+    function row(e) {
       var s = byId[e.id], tx = saintText(s);
       var label = shownName(e);
       var names = [e.label, label, s.name, tx.name].concat(s.aliases);
@@ -225,7 +228,10 @@
         '<span class="saint-row__text"><span class="saint-row__name">' + esc(label) + '</span>' +
         (tx.dates ? '<span class="saint-row__dates">' + esc(tx.dates) + '</span>' : '') +
         '</span></button></li>';
-    }).join('');
+    }
+    list.innerHTML = sortedList.map(row).join('') +
+      (extraList.length ? '<li class="saint-list__head"><h2>' + esc(t('otherIconography')) + '</h2></li>' +
+        extraList.map(row).join('') : '');
     lazyThumbs();
     applyFilter();
   }
@@ -253,10 +259,12 @@
   function applyFilter() {
     var q = filter.value || '';
     var shown = 0;
-    $$('li', list).forEach(function (li) {
+    $$('li[data-names]', list).forEach(function (li) {
       var ok = Fuzzy.matches(q, li.dataset.names.split('|'));
       li.hidden = !ok; if (ok) shown++;
     });
+    var head = $('.saint-list__head', list);
+    if (head) head.hidden = !extraList.some(function (e) { return !list.querySelector('[data-id="' + e.id + '"]').closest('li').hidden; });
     $('#no-results').hidden = shown > 0;
   }
   filter.addEventListener('input', applyFilter);
@@ -269,6 +277,7 @@
     var s = byId[id], tx = saintText(s);
     var img = $('#sheet-img');
     img.src = s.image + '?v=' + CONFIG.version; img.alt = tx.name;
+    img.classList.toggle('is-mural', s.kind === 'mural');
     $('#sheet-name').textContent = tx.name;
     $('#sheet-dates').textContent = tx.dates || '';
     $('#sheet-dates').hidden = !tx.dates;
@@ -283,7 +292,7 @@
   }
   function browseIds() {
     var seen = {}, ids = [];
-    sortedList.forEach(function (e) {
+    sortedList.concat(extraList).forEach(function (e) {
       var li = list.querySelector('[data-id="' + e.id + '"]');
       if (!seen[e.id] && !(li && li.closest('li').hidden)) { seen[e.id] = 1; ids.push(e.id); }
     });

@@ -257,6 +257,11 @@ body.is-camera.cam-live .topbar {
 .filter input:focus { border-color: var(--sg-teal); }
 .saint-list { list-style: none; margin: 0; padding: 0; }
 .saint-list li + li { border-top: 1px solid var(--line); }
+.saint-list__head h2 { margin: 36px 0 8px; font-size: var(--fs-h2); }
+.saint-list li.saint-list__head, .saint-list li.saint-list__head + li { border-top: 0; }
+.profile__dates[hidden] + .profile__bio { margin-top: 18px; }
+.profile__source { display: block; margin-top: 14px; font-size: var(--fs-small); color: var(--muted); }
+.profile__img.is-mural { aspect-ratio: auto; height: auto; width: 80%; max-width: 360px; object-fit: contain; }
 .saint-row {
   width: 100%; display: flex; align-items: center; gap: 14px; padding: 10px 0;
   background: none; border: 0; text-align: left; cursor: pointer;

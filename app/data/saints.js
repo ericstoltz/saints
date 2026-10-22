@@ -1364,6 +1364,23 @@ window.SAINTS = {
    "order": 87,
    "aliases": [],
    "members": []
+  },
+  {
+   "id": "song-of-songs",
+   "name": "Gregory of Nyssa: The Song of Songs",
+   "kind": "mural",
+   "numbers": [],
+   "location": "Apse",
+   "lifespan": null,
+   "feast": null,
+   "bio": "Rising behind the preachers’ chair at St Gregory’s is the marriage of Christ and the Soul icon, taken from Gregory’s commentary on the Song of Songs, a work underlying much classical Christian spiritual writing. The dark-skinned bride in scripture stands for every human being. Her mother-in-law extends loving arms to bless the marriage, while below, Gregory teaches the scene’s deeper meaning, and tells us that this loving mother-in-law represents God, who is not bound to either human gender. Behind these figures looms our church building with a canopy flying overhead: a traditional sign that this spiritual wedding, and indeed all these wonders, actually happen during our liturgy in our church. Like Moses, we turn aside here and see God in human flesh; ours is the soul Christ marries; we are the guests fed at his wedding banquet; we are the dancers linking with all humanity in God’s image; we are the baptizers and the people baptized for God’s mission; and one with the saints circling above, we are becoming God’s friends.<span class=\"profile__source\">From <em>Worship at St Gregory’s</em> by Rick Fabian</span>",
+   "image": "img/saints/song-of-songs.jpg",
+   "order": 1000,
+   "aliases": [
+    "Song of Songs",
+    "Apse"
+   ],
+   "members": []
   }
  ],
  "list": [

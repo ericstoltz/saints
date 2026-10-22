@@ -179,6 +179,7 @@
       var wall = walls[r.id];
       if (!wall || !wall.refW) return;
       if (wall.banner) { banner = { key: wall.banner, seen: now }; }
+      var seenSaint = {};
       wall.hotspots.forEach(function (h) {
         var cx = h.x * wall.refW, cy = h.y * wall.refH, rr = (h.r || 0.04) * wall.refW * 2;
         var c = project(r.H, cx, cy), e = project(r.H, cx + rr, cy), e2 = project(r.H, cx, cy + rr);
@@ -186,7 +187,9 @@
         var rad = (Math.hypot(e.x - c.x, e.y - c.y) + Math.hypot(e2.x - c.x, e2.y - c.y)) / 2 * sc.scale;
         if (sc.x < -rad || sc.y < -rad || sc.x > cw + rad || sc.y > ch + rad || !isFinite(rad)) return;
         if (h.saint === 'jesus') { banner = { key: 'jesusBanner', seen: now }; return; }
-        placeSpot(h.saint, sc.x, sc.y, Math.max(36, rad), now);
+        // several faces can open one profile (the apse mural): 'id', 'id#1', 'id#2', ...
+        var n = seenSaint[h.saint] = (seenSaint[h.saint] || 0) + 1;
+        placeSpot(n > 1 ? h.saint + '#' + (n - 1) : h.saint, sc.x, sc.y, Math.max(36, rad), now);
         dropFacesNear(sc.x, sc.y, Math.max(36, rad));
       });
     });
@@ -312,7 +315,7 @@
     var el = e.target.closest('.spot');
     if (!el || frozen) return;
     var s = spots[el.dataset.id];
-    freeze({ id: el.dataset.id, x: s.x, y: s.y, r: s.r, face: s.face });
+    freeze({ id: el.dataset.id.split('#')[0], x: s.x, y: s.y, r: s.r, face: s.face });
   });
 
   // Cut the tapped face and its neighbours from the full-size picture and ask the face worker who it is.
@@ -381,7 +384,7 @@
     freezeCanvas.hidden = true;
     $('#cam-scrim').setAttribute('hidden', '');
     tray.hidden = true;
-    Object.keys(spots).forEach(function (id) { spots[id].el.hidden = false; spots[id].seen = 0; });
+    Object.keys(spots).forEach(function (id) { spots[id].el.hidden = false; spots[id].seen = Date.now() - 2600; });
     $('#guess-input').value = '';
     hideList();
     identToken++; identity = null; onIdentity = null; pickMode = false;

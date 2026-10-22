@@ -25,7 +25,8 @@ for v in spec['views']:
     jobs.append({'file': raw + '.png', 'kind': 'view', 'view': v['id'], 'w': W, 'h': H})
     spots = []
     prev = view.copy(); d = ImageDraw.Draw(prev)
-    for sid, (fx, fy) in v['faces'].items():
+    for key, (fx, fy) in v['faces'].items():
+        sid = key.split('#')[0]   # 'id#2': another face that opens the same profile
         assert sid in saints, 'unknown saint id ' + sid
         tiled.add(sid)
         r = v['halo'] * 0.35 * k
@@ -35,7 +36,7 @@ for v in spec['views']:
         # close-up tile around the face, from the full-resolution photo
         side = v['halo'] * TILE_HALOS; bx, by = round(fx - side / 2), round(fy - side * 0.42)
         tile = im.crop((bx, by, bx + round(side), by + round(side))).resize((TILE_PX, TILE_PX), Image.LANCZOS)
-        traw = os.path.join(tmp, v['id'] + '-' + sid + '.png'); tile.convert('L').save(traw)
+        traw = os.path.join(tmp, v['id'] + '-' + key.replace('#', '-') + '.png'); tile.convert('L').save(traw)
         jobs.append({'file': traw, 'kind': 'tile', 'view': v['id'], 'w': W, 'h': H, 'tw': TILE_PX, 'th': TILE_PX,
                      'a': round(side / TILE_PX * k, 6), 'ox': round((bx - x0) * k, 3), 'oy': round((by - y0) * k, 3)})
     prev.save(os.path.join(T, 'previews', v['id'] + '.jpg'), quality=80)

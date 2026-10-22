@@ -362,9 +362,21 @@
    "halo": 171,
    "banner": "apseBanner",
    "faces": {
-    "gregory-of-nyssa": [
+    "song-of-songs": [
      1931,
      3027
+    ],
+    "song-of-songs#2": [
+     1939,
+     2093
+    ],
+    "song-of-songs#3": [
+     1739,
+     2311
+    ],
+    "song-of-songs#4": [
+     2076,
+     2331
     ]
    }
   },

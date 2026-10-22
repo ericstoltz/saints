@@ -98,9 +98,14 @@ for i, e in enumerate(entries):
         'members': SPLIT.get(name, []),
     })
 
+# profiles that are not dancing saints (the apse mural): shown by the camera, not in the list
+import os
+saints += json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'extra_profiles.json')))
+
 # list entries: every profile, plus pair members listed on their own
 listing = []
 for s in saints:
+    if s.get('kind') == 'mural': continue
     listing.append({'label': s['name'], 'id': s['id']})
     for m in s['members']:
         listing.append({'label': m, 'id': s['id']})
