@@ -16,6 +16,8 @@ NAME_FIX = {
     'Samuel Isaac Joseph Scherechewsky': 'Samuel Isaac Joseph Schereschewsky',
     'Teresa of Avila': 'Teresa of Ávila',
 }
+# opening words changed at Eric's request: name -> (old, new)
+BIO_START = {'Sergius & Bacchus': ('Roman soldiers who were martyred for their Christian faith.', 'Sergius and Bacchus were Roman soldiers who were martyred for their Christian faith.')}
 EXCLUDE_NUMBERS = {36}   # brochure profiles left out of the app
 # sort key = brochure order (by family name); extra names people may type
 ALIASES = {
@@ -92,7 +94,7 @@ for i, e in enumerate(entries):
     saints.append({
         'id': slug, 'name': name, 'numbers': numbers,
         'location': WALLS.get(numbers[0]) if numbers else None,
-        'lifespan': lifespan, 'feast': feast, 'bio': body,
+        'lifespan': lifespan, 'feast': feast, 'bio': body.replace(*BIO_START[name], 1) if name in BIO_START else body,
         'image': f'img/saints/{slug}.jpg', 'order': i,
         'aliases': ALIASES.get(name, []),
         'members': SPLIT.get(name, []),

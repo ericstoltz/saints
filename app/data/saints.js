@@ -1099,7 +1099,7 @@ window.SAINTS = {
    "location": "Southeast wall, lower",
    "lifespan": "4th century",
    "feast": "October 7",
-   "bio": "Roman soldiers who were martyred for their Christian faith. The ancient veneration of these two men shows how the Church honors two people of the same gender in a loving relationship. In their love they found courage for the choice they were called to make as witnesses to Christ.",
+   "bio": "Sergius and Bacchus were Roman soldiers who were martyred for their Christian faith. The ancient veneration of these two men shows how the Church honors two people of the same gender in a loving relationship. In their love they found courage for the choice they were called to make as witnesses to Christ.",
    "image": "img/saints/sergius-bacchus.jpg",
    "order": 70,
    "aliases": [],

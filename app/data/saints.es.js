@@ -240,7 +240,7 @@ window.SAINTS_ES = {
  },
  "sergius-bacchus": {
   "name": "Sergio y Baco",
-  "bio": "Soldados romanos martirizados por su fe cristiana. La antigua veneración de estos dos hombres muestra cómo la Iglesia honra a dos personas del mismo sexo en una relación de amor. En su amor encontraron valor para la decisión a la que fueron llamados como testigos de Cristo."
+  "bio": "Sergio y Baco fueron soldados romanos martirizados por su fe cristiana. La antigua veneración de estos dos hombres muestra cómo la Iglesia honra a dos personas del mismo sexo en una relación de amor. En su amor encontraron valor para la decisión a la que fueron llamados como testigos de Cristo."
  },
  "william-shakespeare": {
   "bio": "Dramaturgo y poeta isabelino profundamente espiritual. Lo celebramos especialmente por su comprensión de la obra de la gracia y de la dinámica de la redención."
