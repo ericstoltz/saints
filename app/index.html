@@ -8,8 +8,8 @@
   <meta name="theme-color" content="#ffffff">
   <link rel="icon" href="img/favicon.png">
   <link rel="apple-touch-icon" href="img/apple-touch-icon.png">
-  <link rel="stylesheet" href="css/fonts.css?v=20261022h">
-  <link rel="stylesheet" href="css/app.css?v=20261022h">
+  <link rel="stylesheet" href="css/fonts.css?v=20261022i">
+  <link rel="stylesheet" href="css/app.css?v=20261022i">
 </head>
 <body>
   <a class="skip-link" href="#main" data-i18n="skip">Skip</a>
@@ -17,18 +17,20 @@
   <!-- 1. Loading screen: logo, quote, language choice -->
   <section id="screen-loading" class="splash" aria-labelledby="loading-quote">
     <div class="splash__inner">
-      <img class="splash__logo" data-src-logo alt="St. Gregory of Nyssa Episcopal Church" width="500" height="500">
-      <h1 class="splash__title">The Dancing Saints<span class="splash__title-es" lang="es">Los Santos Danzantes</span></h1>
+      <h1 class="splash__title">
+        <span class="splash__the">The</span>
+        <span class="splash__name">Dancing Saints</span>
+        <span class="splash__es" lang="es">Los Santos Danzantes</span>
+      </h1>
       <figure class="splash__quote">
         <blockquote id="loading-quote"><p data-i18n="loadingQuote"></p></blockquote>
-        <figcaption>— <span data-i18n="loadingQuoteBy"></span></figcaption>
+        <figcaption data-i18n="loadingQuoteBy"></figcaption>
       </figure>
-      <div class="splash__lang" role="group" aria-label="Language / Idioma">
-        <div class="lang-buttons">
-          <button type="button" class="btn btn--lang" data-lang="en" lang="en">English</button>
-          <button type="button" class="btn btn--lang" data-lang="es" lang="es">Español</button>
-        </div>
+      <div class="splash__lang lang-buttons" role="group" aria-label="Language / Idioma">
+        <button type="button" class="btn btn--lang" data-lang="en" lang="en">English</button>
+        <button type="button" class="btn btn--lang" data-lang="es" lang="es">Español</button>
       </div>
+      <img class="splash__logo" data-src-logo alt="St. Gregory of Nyssa Episcopal Church" width="500" height="500">
     </div>
   </section>
 
@@ -229,13 +231,13 @@
     </div>
   </dialog>
 
-  <script src="js/config.js?v=20261022h"></script>
-  <script src="data/content.js?v=20261022h"></script>
-  <script src="data/saints.js?v=20261022h"></script>
-  <script src="data/saints.es.js?v=20261022h"></script>
-  <script src="data/mural.js?v=20261022h"></script>
-  <script src="js/fuzzy.js?v=20261022h"></script>
-  <script src="js/camera.js?v=20261022h"></script>
-  <script src="js/app.js?v=20261022h"></script>
+  <script src="js/config.js?v=20261022i"></script>
+  <script src="data/content.js?v=20261022i"></script>
+  <script src="data/saints.js?v=20261022i"></script>
+  <script src="data/saints.es.js?v=20261022i"></script>
+  <script src="data/mural.js?v=20261022i"></script>
+  <script src="js/fuzzy.js?v=20261022i"></script>
+  <script src="js/camera.js?v=20261022i"></script>
+  <script src="js/app.js?v=20261022i"></script>
 </body>
 </html>
