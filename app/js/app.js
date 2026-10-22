@@ -290,6 +290,7 @@
     return ids;
   }
 
+  var sheetTimer = 0;
   function openSheet(id, opts) {
     opts = opts || {};
     sheetState = { id: id, browse: !!opts.browse, opener: opts.opener || document.activeElement, onClose: opts.onClose || null };
@@ -298,6 +299,10 @@
     if (!sheet.open) {
       if (sheet.showModal) sheet.showModal(); else sheet.setAttribute('open', '');
       requestAnimationFrame(function () { requestAnimationFrame(function () { sheet.classList.add('is-open'); }); });
+      // Lock the page, and once the sheet is up hide the page under it (see .sheet-open in app.css).
+      document.documentElement.classList.add('sheet-lock');
+      clearTimeout(sheetTimer);
+      sheetTimer = setTimeout(function () { if (sheet.open) document.documentElement.classList.add('sheet-open'); }, 320);
     }
     $('.sheet__close').focus({ preventScroll: true });
   }
@@ -305,6 +310,8 @@
   function closeSheet() {
     if (!sheet.open) return;
     sheet.classList.remove('is-open');
+    clearTimeout(sheetTimer);
+    document.documentElement.classList.remove('sheet-open', 'sheet-lock');
     var done = sheetState.onClose, opener = sheetState.opener;
     setTimeout(function () {
       if (sheet.close) sheet.close(); else sheet.removeAttribute('open');

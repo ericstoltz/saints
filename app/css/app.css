@@ -372,13 +372,12 @@ body.is-camera.cam-live .topbar {
   transform: translateY(100%); transition: transform .3s var(--ease);
 }
 .sheet.is-open .sheet__panel { transform: none; }
-/* iOS Safari lets the page show through below fixed elements, behind its floating toolbar.
-   Stretch the sheet to the bottom of the screen and keep its content above the toolbar. */
-@supports (height: 100lvh) {
-  .sheet { height: 100lvh; }
-  .sheet::backdrop { bottom: auto; height: 100lvh; }
-  .sheet__panel { height: calc(85dvh + 100lvh - 100svh); padding-bottom: calc(100lvh - 100svh); }
-}
+/* iOS Safari shows the page itself, not fixed layers, under its floating bottom toolbar. So while
+   the sheet is open the page can't scroll, and once the sheet is up the page under it is hidden
+   and the area below the sheet takes the sheet's colour. */
+html.sheet-lock { overflow: hidden; overscroll-behavior: none; }
+html.sheet-open body { background: var(--sg-cream); }
+html.sheet-open .page { visibility: hidden; }
 .sheet__grip { width: 44px; height: 5px; border-radius: 3px; background: #d8cfae; margin: 10px auto 0; flex: none; }
 .sheet__close { position: absolute; top: 8px; right: 8px; color: var(--ink); z-index: 1; }
 .sheet__scroll { flex: 1 1 auto; min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; padding: 14px calc(var(--gutter) + 18px) 16px; }
