@@ -360,7 +360,7 @@ body.is-camera.cam-live .topbar {
 /* ---------- Profile bottom sheet ---------- */
 .sheet {
   padding: 0; border: 0; margin: 0; max-width: none; max-height: none; width: 100%; height: 100%;
-  background: transparent; overflow: hidden;
+  background: transparent; overflow: hidden; overflow: clip;   /* clip: the dialog itself must never scroll */
 }
 .sheet::backdrop { background: var(--scrim); }
 .sheet__panel {
@@ -389,12 +389,8 @@ html.sheet-open .page { visibility: hidden; }
 .profile__feast { margin: 0 0 16px; text-align: center; text-transform: uppercase; font-size: 0.8em; letter-spacing: 0.08em; }
 .sheet__foot {
   display: flex; align-items: center; justify-content: center; gap: 16px;
-  padding: 8px 0 calc(var(--safe-b) + 14px);
-  /* stays in view at the bottom of the sheet while long text scrolls under it */
-  position: sticky; bottom: -16px; z-index: 1;
-  margin: 0 calc(-1 * (var(--gutter) + 18px)) -16px; padding-left: 0; padding-right: 0;
-  padding-top: 20px; padding-bottom: calc(var(--safe-b) + 30px);
-  background: linear-gradient(rgba(250,246,229,0), var(--sg-cream) 20px);
+  /* after the text (not pinned); extra room below so it scrolls clear of Safari's toolbar */
+  padding: 8px 0 calc(var(--safe-b) + 28px);
 }
 .sheet__foot .btn { min-width: 140px; }
 .sheet:not(.is-browse) #sheet-prev, .sheet:not(.is-browse) #sheet-next { display: none; }

@@ -322,6 +322,9 @@
   }
 
   $$('[data-close]', sheet).forEach(function (b) { b.addEventListener('click', closeSheet); });
+  // Opening the dialog focuses its close button while the panel is still below the screen, and
+  // some browsers scroll the dialog to show it, which leaves the sheet cut off at the bottom.
+  sheet.addEventListener('scroll', function () { if (sheet.scrollTop) sheet.scrollTop = 0; });
   sheet.addEventListener('cancel', function (e) { e.preventDefault(); closeSheet(); });
   sheet.addEventListener('click', function (e) { if (e.target === sheet) closeSheet(); });
   function step(d) {
