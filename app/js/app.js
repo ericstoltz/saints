@@ -114,8 +114,11 @@
     var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
     var distance = crawl.scrollHeight - box.clientHeight * 0.75;
     if (reduce || !crawl.animate) { crawl.style.paddingTop = '24px'; box.style.overflow = 'auto'; return; }
-    crawlAnim = crawl.animate([{ transform: 'translateY(0)' }, { transform: 'translateY(' + (-distance) + 'px)' }],
-      { duration: Math.max(14000, distance * 28), easing: 'linear', fill: 'forwards' });
+    // Start with the picture of Jesus already in the middle of the screen.
+    var christ = $('.intro__christ', crawl);
+    var start = Math.max(0, Math.min(distance, christ.offsetTop + christ.offsetHeight / 2 - box.clientHeight / 2));
+    crawlAnim = crawl.animate([{ transform: 'translateY(' + (-start) + 'px)' }, { transform: 'translateY(' + (-distance) + 'px)' }],
+      { duration: Math.max(9000, (distance - start) * 28), easing: 'linear', fill: 'forwards' });
     // Let people take over by touching or scrolling.
     var stop = function () {
       if (!crawlAnim) return;
