@@ -8,8 +8,8 @@
   <meta name="theme-color" content="#ffffff">
   <link rel="icon" href="img/favicon.png">
   <link rel="apple-touch-icon" href="img/apple-touch-icon.png">
-  <link rel="stylesheet" href="css/fonts.css?v=20261024d">
-  <link rel="stylesheet" href="css/app.css?v=20261024d">
+  <link rel="stylesheet" href="css/fonts.css?v=20261024e">
+  <link rel="stylesheet" href="css/app.css?v=20261024e">
 </head>
 <body>
   <a class="skip-link" href="#main" data-i18n="skip">Skip</a>
@@ -177,8 +177,9 @@
           <ul id="saint-list" class="saint-list" aria-labelledby="browse-title"></ul>
           <p id="no-results" class="muted" data-i18n="noResults" hidden></p>
         </div>
-        <aside class="browse-aside" data-when="desktop" aria-label="More">
+        <aside class="browse-aside" data-when="desktop" aria-label="Pages">
           <ul>
+            <li><span aria-current="page" data-i18n="browseTitle"></span></li>
             <li><a href="#/commentary" data-i18n="navCommentary"></a></li>
             <li><a href="#/iconographer" data-i18n="navIconographer"></a></li>
           </ul>
@@ -188,24 +189,40 @@
 
       <!-- Option 3: commentary -->
       <section id="screen-commentary" class="page accent-wine" hidden>
+        <div class="browse-layout">
         <article class="page__inner prose" aria-labelledby="commentary-title">
-          <a class="back-link" href="#/browse"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg><span data-i18n="browseTitle"></span></a>
           <p class="eyebrow" data-i18n="commentaryEyebrow"></p>
           <h1 id="commentary-title" data-i18n="commentaryTitle"></h1>
           <p class="byline" data-i18n="commentaryBy"></p>
           <div id="commentary-body"></div>
         </article>
+        <aside class="browse-aside" data-when="desktop" aria-label="Pages">
+          <ul>
+            <li><a href="#/browse" data-i18n="browseTitle"></a></li>
+            <li><span aria-current="page" data-i18n="navCommentary"></span></li>
+            <li><a href="#/iconographer" data-i18n="navIconographer"></a></li>
+          </ul>
+        </aside>
+        </div>
       </section>
 
       <!-- Option 4: iconographer -->
       <section id="screen-iconographer" class="page accent-green" hidden>
+        <div class="browse-layout">
         <article class="page__inner prose" aria-labelledby="iconographer-title">
-          <a class="back-link" href="#/browse"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg><span data-i18n="browseTitle"></span></a>
           <p class="eyebrow" data-i18n="iconographerEyebrow"></p>
           <h1 id="iconographer-title" data-i18n="iconographerTitle"></h1>
           <img class="portrait" src="img/iconographer.jpg" data-i18n-alt="iconographerPhotoAlt" width="315" height="387">
           <div id="iconographer-body"></div>
         </article>
+        <aside class="browse-aside" data-when="desktop" aria-label="Pages">
+          <ul>
+            <li><a href="#/browse" data-i18n="browseTitle"></a></li>
+            <li><a href="#/commentary" data-i18n="navCommentary"></a></li>
+            <li><span aria-current="page" data-i18n="navIconographer"></span></li>
+          </ul>
+        </aside>
+        </div>
       </section>
     </main>
   </div>
@@ -241,13 +258,13 @@
     </div>
   </dialog>
 
-  <script src="js/config.js?v=20261024d"></script>
-  <script src="data/content.js?v=20261024d"></script>
-  <script src="data/saints.js?v=20261024d"></script>
-  <script src="data/saints.es.js?v=20261024d"></script>
-  <script src="data/mural.js?v=20261024d"></script>
-  <script src="js/fuzzy.js?v=20261024d"></script>
-  <script src="js/camera.js?v=20261024d"></script>
-  <script src="js/app.js?v=20261024d"></script>
+  <script src="js/config.js?v=20261024e"></script>
+  <script src="data/content.js?v=20261024e"></script>
+  <script src="data/saints.js?v=20261024e"></script>
+  <script src="data/saints.es.js?v=20261024e"></script>
+  <script src="data/mural.js?v=20261024e"></script>
+  <script src="js/fuzzy.js?v=20261024e"></script>
+  <script src="js/camera.js?v=20261024e"></script>
+  <script src="js/app.js?v=20261024e"></script>
 </body>
 </html>
