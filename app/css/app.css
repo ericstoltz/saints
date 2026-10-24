@@ -259,7 +259,7 @@ body.is-camera.cam-live .topbar {
 .browse-aside a:hover { text-decoration: underline; text-underline-offset: 3px; }
 .browse-layout:has(.browse-aside:not([hidden])) { display: grid; grid-template-columns: minmax(0, 1fr) 260px; gap: 40px; max-width: calc(var(--reading) + 288px + 2 * var(--gutter)); margin: 0 auto; }
 .browse-layout:has(.browse-aside:not([hidden])) .page__inner { margin: 0; max-width: none; }
-.browse-aside:not([hidden]) { padding: 190px 0 0; }
+.browse-aside:not([hidden]) { padding: 24px 0 0; }
 .browse-aside > ul { position: sticky; top: 96px; }
 @media (max-width: 760px) { .browse-layout:has(.browse-aside:not([hidden])) { display: block; } .browse-aside:not([hidden]) { padding: 0 var(--gutter) 48px; } }
 .home h1, .home .lede { max-width: var(--reading); }
