@@ -249,6 +249,16 @@ body.is-camera.cam-live .topbar {
 
 /* Desktop home: 2-up photo cards with a black bottom scrim */
 .page__inner.home { max-width: var(--content); }
+/* Computer: the saints list with links to the other pages beside it */
+.browse-aside ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.browse-aside a { display: block; padding: 12px 0; border-bottom: 1px solid var(--line); color: var(--sg-teal); font-weight: 600; text-decoration: none; }
+.browse-aside a::after { content: '\00a0›'; color: var(--accent); }
+.browse-aside a:hover { text-decoration: underline; text-underline-offset: 3px; }
+.browse-layout:has(.browse-aside:not([hidden])) { display: grid; grid-template-columns: minmax(0, 1fr) 260px; gap: 40px; max-width: calc(var(--reading) + 288px + 2 * var(--gutter)); margin: 0 auto; }
+.browse-layout:has(.browse-aside:not([hidden])) .page__inner { margin: 0; max-width: none; }
+.browse-aside:not([hidden]) { padding: 190px 0 0; }
+.browse-aside > ul { position: sticky; top: 96px; }
+@media (max-width: 760px) { .browse-layout:has(.browse-aside:not([hidden])) { display: block; } .browse-aside:not([hidden]) { padding: 0 var(--gutter) 48px; } }
 .home h1, .home .lede { max-width: var(--reading); }
 .cards { list-style: none; padding: 0; margin: 32px 0 0; display: grid; gap: 16px; grid-template-columns: 1fr; }
 @media (min-width: 640px) { .cards { grid-template-columns: 1fr 1fr; } }

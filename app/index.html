@@ -8,8 +8,8 @@
   <meta name="theme-color" content="#ffffff">
   <link rel="icon" href="img/favicon.png">
   <link rel="apple-touch-icon" href="img/apple-touch-icon.png">
-  <link rel="stylesheet" href="css/fonts.css?v=20261024a">
-  <link rel="stylesheet" href="css/app.css?v=20261024a">
+  <link rel="stylesheet" href="css/fonts.css?v=20261024b">
+  <link rel="stylesheet" href="css/app.css?v=20261024b">
 </head>
 <body>
   <a class="skip-link" href="#main" data-i18n="skip">Skip</a>
@@ -55,7 +55,7 @@
       </div>
       <div data-when="desktop">
         <p data-i18n="desktopMessage"></p>
-        <a class="btn btn--on-photo" href="#/home" data-i18n="continue"></a>
+        <a class="btn btn--on-photo" href="#/browse" data-i18n="continue"></a>
       </div>
     </div>
   </section>
@@ -164,6 +164,7 @@
 
       <!-- Option 2: browse -->
       <section id="screen-browse" class="page accent-orange" hidden aria-labelledby="browse-title">
+        <div class="browse-layout">
         <div class="page__inner">
           <p class="eyebrow" data-i18n="appName"></p>
           <h1 id="browse-title" data-i18n="browseTitle"></h1>
@@ -175,6 +176,13 @@
           </div>
           <ul id="saint-list" class="saint-list" aria-labelledby="browse-title"></ul>
           <p id="no-results" class="muted" data-i18n="noResults" hidden></p>
+        </div>
+        <aside class="browse-aside" data-when="desktop" aria-label="More">
+          <ul>
+            <li><a href="#/commentary" data-i18n="navCommentary"></a></li>
+            <li><a href="#/iconographer" data-i18n="navIconographer"></a></li>
+          </ul>
+        </aside>
         </div>
       </section>
 
@@ -231,13 +239,13 @@
     </div>
   </dialog>
 
-  <script src="js/config.js?v=20261024a"></script>
-  <script src="data/content.js?v=20261024a"></script>
-  <script src="data/saints.js?v=20261024a"></script>
-  <script src="data/saints.es.js?v=20261024a"></script>
-  <script src="data/mural.js?v=20261024a"></script>
-  <script src="js/fuzzy.js?v=20261024a"></script>
-  <script src="js/camera.js?v=20261024a"></script>
-  <script src="js/app.js?v=20261024a"></script>
+  <script src="js/config.js?v=20261024b"></script>
+  <script src="data/content.js?v=20261024b"></script>
+  <script src="data/saints.js?v=20261024b"></script>
+  <script src="data/saints.es.js?v=20261024b"></script>
+  <script src="data/mural.js?v=20261024b"></script>
+  <script src="js/fuzzy.js?v=20261024b"></script>
+  <script src="js/camera.js?v=20261024b"></script>
+  <script src="js/app.js?v=20261024b"></script>
 </body>
 </html>

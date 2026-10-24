@@ -152,13 +152,14 @@
 
   function route() {
     var parts = location.hash.replace(/^#\/?/, '').split('/');
-    var name = parts[0] || (isMobile ? 'camera' : 'home');
-    if (name === 'camera' && !isMobile) name = 'home';
+    // On a computer the saints list is the home page.
+    var name = parts[0] || (isMobile ? 'camera' : 'browse');
+    if ((name === 'camera' && !isMobile) || name === 'home') name = isMobile ? 'camera' : 'browse';
     if (name === 'saint') { // deep link: #/saint/<id>
       name = 'browse';
       if (byId[parts[1]]) setTimeout(function () { openSheet(parts[1], { browse: true }); }, 50);
     }
-    if (!screens[name]) name = isMobile ? 'camera' : 'home';
+    if (!screens[name]) name = isMobile ? 'camera' : 'browse';
     if (!(splashDone || splash.hidden) || !intro.hidden) return;
     shell.hidden = false;
     Object.keys(screens).forEach(function (k) { $(screens[k]).hidden = k !== name; });
