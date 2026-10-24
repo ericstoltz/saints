@@ -249,6 +249,9 @@ body.is-camera.cam-live .topbar {
 
 /* Desktop home: 2-up photo cards with a black bottom scrim */
 .page__inner.home { max-width: var(--content); }
+.back-link { display: inline-flex; align-items: center; gap: 4px; margin: -8px 0 16px -6px; padding: 6px 8px 6px 0; color: var(--sg-teal); font-weight: 600; text-decoration: none; }
+.back-link svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.back-link:hover span { text-decoration: underline; text-underline-offset: 3px; }
 /* Computer: the saints list with links to the other pages beside it */
 .browse-aside ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
 .browse-aside a { display: block; padding: 12px 0; border-bottom: 1px solid var(--line); color: var(--sg-teal); font-weight: 600; text-decoration: none; }
