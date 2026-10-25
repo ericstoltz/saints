@@ -69,7 +69,7 @@ window.CONTENT = {
       'Musicians, artists, writers, poets, dancers, workers, organizers, missionaries, martyrs, spiritual teachers, protesters, prophets, reformers, judges, builders, liberators, scholars, healers, soldiers, monastics, couples straight and gay, diplomats, planners, governors, and wild and domestic beasts. Christian, Jew, Muslim, Confucian, Buddhist, Hindu, Shinto, Pagan; of many continents, races, classes and eras. These saints lead us in our dancing, as all look upward to Jesus, the perfecter of human faith, drawing new harmony from his example as Gregory teaches us to do.'
     ],
     commentaryPoem: ['God creates life', 'life beholds beauty', 'beauty begets love', 'love is the life of God.'],
-    commentaryPhotoAlt: 'Sunlight streams into the rotunda of St. Gregory’s, above the altar and the dancing saints.',
+    commentaryPhotoAlt: 'The congregation holds candles around the altar in the candlelit rotunda of St. Gregory’s, beneath the dancing saints.',
     iconographerEyebrow: 'About the iconographer',
     iconographerTitle: 'Mark Dukes',
     iconographerPhotoAlt: 'Portrait of Mark Dukes',
@@ -157,7 +157,7 @@ window.CONTENT = {
       'Músicos, artistas, escritores, poetas, bailarines, trabajadores, organizadores, misioneros, mártires, maestros espirituales, manifestantes, profetas, reformadores, jueces, constructores, libertadores, eruditos, sanadores, soldados, monjes, parejas heterosexuales y homosexuales, diplomáticos, planificadores, gobernantes, y bestias salvajes y domésticas. Cristianos, judíos, musulmanes, confucianos, budistas, hindúes, sintoístas, paganos; de muchos continentes, razas, clases y épocas. Estos santos nos guían en nuestra danza, mientras todos miramos hacia lo alto, a Jesús, el que perfecciona la fe humana, sacando nueva armonía de su ejemplo, como Gregorio nos enseña a hacer.'
     ],
     commentaryPoem: ['Dios crea la vida', 'la vida contempla la belleza', 'la belleza engendra el amor', 'el amor es la vida de Dios.'],
-    commentaryPhotoAlt: 'La luz del sol entra en la rotonda de San Gregorio, sobre el altar y los santos danzantes.',
+    commentaryPhotoAlt: 'La congregación sostiene velas alrededor del altar en la rotonda de San Gregorio, iluminada por velas, bajo los santos danzantes.',
     iconographerEyebrow: 'Sobre el iconógrafo',
     iconographerTitle: 'Mark Dukes',
     iconographerPhotoAlt: 'Retrato de Mark Dukes',

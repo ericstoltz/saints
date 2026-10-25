@@ -195,7 +195,7 @@
     var c = t('commentary');
     $('#commentary-body').innerHTML =
       paras(c.slice(0, 2), 'dropcap') +
-      '<figure><img src="img/rotunda.jpg" alt="' + esc(t('commentaryPhotoAlt')) + '" width="540" height="708" loading="lazy"></figure>' +
+      '<figure><img src="img/commentary.jpg?v=' + CONFIG.version + '" alt="' + esc(t('commentaryPhotoAlt')) + '" width="1114" height="1536" loading="lazy"></figure>' +
       paras(c.slice(2)) +
       '<blockquote class="poem">' + t('commentaryPoem').map(function (l) { return '<p>' + esc(l) + '</p>'; }).join('') +
       '<cite>— ' + esc(t('introQuoteBy')) + '</cite></blockquote>';
