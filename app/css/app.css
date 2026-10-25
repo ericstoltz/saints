@@ -156,7 +156,7 @@ html { -webkit-tap-highlight-color: transparent; }
 
 /* ---------- Intro: full-bleed photo hero with slowly scrolling text ---------- */
 .splash--intro {
-  padding: 0; color: #fff; background: #000 url(../img/rotunda.jpg) center / cover no-repeat;
+  padding: 0; color: #fff; background: #000 url(../img/communion.jpg) center / cover no-repeat;
 }
 .splash--intro::before {
   content: ''; position: absolute; inset: 0;
