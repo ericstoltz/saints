@@ -118,9 +118,19 @@ function halfToFloat(h) {
   return out;
 }
 
-// saint ids in a fixed order, and for each the rows of P that belong to it
+// Naming keys in a fixed order, and for each the rows of P that belong to it. A key is a saint id,
+// or for the paired saints 'id|Member', since each member has a portrait (and a face) of their own.
 var SAINTS = [], ROWS = {};
-F.rows.forEach(function (id, r) { if (!ROWS[id]) { ROWS[id] = []; SAINTS.push(id); } ROWS[id].push(r); });
+F.rows.forEach(function (id, r) {
+  var key = id + '|' + ((F.members && F.members[r]) || '');
+  if (!ROWS[key]) { ROWS[key] = []; SAINTS.push(key); }
+  ROWS[key].push(r);
+});
+function idOf(a) { return SAINTS[a].split('|')[0]; }
+function memberOf(a) { return SAINTS[a].split('|')[1] || null; }
+// Some portraits look a bit like every face, and win when a face is small or blurry. Part of
+// that general likeness (F.hub) is taken off each saint's score when ranking.
+var HUB_W = 0.25, HUB = SAINTS.map(function (k) { return (F.hub && F.hub[k]) || 0; });
 
 // One encoder run at a time: checks of new circles and naming a tapped face share it.
 var encQueue = Promise.resolve();
@@ -160,7 +170,7 @@ function scoreAll(E, n) {
 
 // Is face b's layout position where the frame says it should be, relative to face a?
 function compat(a, b, v) {
-  var la = F.layout[SAINTS[a]], lb = F.layout[SAINTS[b]];
+  var la = F.layout[SAINTS[a]] || F.layout[idOf(a)], lb = F.layout[SAINTS[b]] || F.layout[idOf(b)];
   if (!la || !lb) return 0;
   var ux = lb[0] - la[0], uy = lb[1] - la[1], W = F.layoutWidth;
   ux = ((ux + W / 2) % W + W) % W - W / 2;
@@ -174,7 +184,8 @@ function compat(a, b, v) {
 // to whom on the mural (iterated conditional modes).
 function decode(faces, B) {
   var n = faces.length, LAM = 0.7, RAD = 4, TOPK = 10;
-  var Z = B.map(function (row) {
+  var Z = B.map(function (raw) {
+    var row = Array.prototype.map.call(raw, function (x, a) { return x - HUB_W * HUB[a]; });
     var m = 0, s = 0, i;
     for (i = 0; i < row.length; i++) m += row[i];
     m /= row.length;
@@ -191,33 +202,54 @@ function decode(faces, B) {
     });
   });
   var s = cand.map(function (c) { return c[0]; });
+  function energy(i, a) {
+    var e = Z[i][a];
+    nb[i].forEach(function (j) {
+      var k = F.faceInLayout / ((faces[i].w + faces[j].w) / 2);
+      e += LAM * compat(a, s[j], [(faces[j].x - faces[i].x) * k, (faces[j].y - faces[i].y) * k]);
+    });
+    return e;
+  }
   for (var it = 0; it < 6; it++) {
     var changed = false;
     for (var i = 0; i < n; i++) {
       var best = -1e9, arg = s[i];
-      cand[i].forEach(function (a) {
-        var e = Z[i][a];
-        nb[i].forEach(function (j) {
-          var k = F.faceInLayout / ((faces[i].w + faces[j].w) / 2);
-          e += LAM * compat(a, s[j], [(faces[j].x - faces[i].x) * k, (faces[j].y - faces[i].y) * k]);
-        });
-        if (e > best) { best = e; arg = a; }
-      });
+      cand[i].forEach(function (a) { var e = energy(i, a); if (e > best) { best = e; arg = a; } });
       if (arg !== s[i]) { s[i] = arg; changed = true; }
     }
     if (!changed) break;
   }
-  return s;
+  // the tapped face's candidates, best first, counting the neighbours' support
+  var e0 = {}; cand[0].forEach(function (a) { e0[a] = energy(0, a); });
+  return { labels: s, ranked: cand[0].slice().sort(function (a, b) { return e0[b] - e0[a]; }), Z: Z[0] };
 }
 
 function identify(m) {
   return loadEncoder().then(function () { return embed(m.crops); }).then(function (E) {
-    var n = m.faces.length, B = scoreAll(E, n), s = decode(m.faces, B), b = B[0];
-    var order = SAINTS.map(function (x, i) { return i; }).sort(function (x, y) { return b[y] - b[x]; });
-    var pick = s[0], ranked = [pick].concat(order.filter(function (i) { return i !== pick; })).slice(0, 5);
+    var n = m.faces.length, B = scoreAll(E, m.crops.length);
+    // twice: the first two crops are the tapped face, framed two ways; average them
+    if (m.twice) { B[1] = B[0].map(function (x, a) { return (x + B[1][a]) / 2; }); B.shift(); }
+    var d = decode(m.faces, B), b = B[0];
+    var adj = SAINTS.map(function (x, a) { return b[a] - HUB_W * HUB[a]; });
+    var order = SAINTS.map(function (x, i) { return i; }).sort(function (x, y) { return adj[y] - adj[x]; });
+    var pick = d.labels[0];
+    var ranked = [pick].concat(d.ranked, order).filter(function (a, i, all) { return all.indexOf(a) === i; }).slice(0, 5);
     // sure when the neighbours agree with the best portrait match and it clearly beats the next one
-    var sure = pick === order[0] && b[order[0]] - b[order[1]] >= 0.02;
-    return { id: SAINTS[pick], sure: sure, ranked: ranked.map(function (i) { return { id: SAINTS[i], score: b[i] }; }) };
+    // (the two members of a pair open the same profile, so the runner-up is the best other saint)
+    var next = order.filter(function (x) { return idOf(x) !== idOf(order[0]); })[0];
+    var sure = pick === order[0] && adj[order[0]] - adj[next] >= 0.02;
+    return { id: idOf(pick), member: memberOf(pick), sure: sure, ranked: ranked.map(function (a) {
+      return { id: idOf(a), member: memberOf(a), score: b[a] };
+    }) };
+  });
+}
+
+// Which member of a pair a face is (for circles placed from the wall photos, which only know the pair).
+function member(m) {
+  return loadEncoder().then(function () { return embed(m.crops); }).then(function (E) {
+    var row = scoreAll(E, 1)[0], best = null, bs = -2;
+    SAINTS.forEach(function (k, a) { if (idOf(a) === m.id && memberOf(a) && row[a] > bs) { bs = row[a]; best = memberOf(a); } });
+    return best;
   });
 }
 
@@ -246,6 +278,9 @@ onmessage = function (e) {
   } else if (m.type === 'verify') {
     verify(m).then(function (sims) { postMessage({ type: 'verified', token: m.token, sims: sims }); },
       function (err) { postMessage({ type: 'verified', token: m.token, error: String(err) }); });
+  } else if (m.type === 'member') {
+    member(m).then(function (r) { postMessage({ type: 'member', token: m.token, member: r }); },
+      function (err) { postMessage({ type: 'member', token: m.token, error: String(err) }); });
   } else if (m.type === 'identify') {
     identify(m).then(function (r) { r.type = 'identity'; r.token = m.token; postMessage(r); },
       function (err) { postMessage({ type: 'identity', token: m.token, error: String(err) }); });

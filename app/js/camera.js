@@ -25,6 +25,12 @@
   var encReady = false, encFailed = false, verifyBusy = false, verifyToken = 0, verifyIds = [];
   var identity = null, identToken = 0, onIdentity = null;
   var faceCanvas = document.createElement('canvas'), fctx = faceCanvas.getContext('2d', { willReadFrequently: true });
+  // The full-size picture the face finder is looking at, so faces are cut from the same moment
+  // they were found in. Each circle keeps the sharpest cut of its face from the last few seconds:
+  // a phone moving (or a tap) blurs some frames, and blurry faces are hard to name.
+  var snapCanvas = document.createElement('canvas'), sctx = snapCanvas.getContext('2d', { willReadFrequently: true });
+  var stillCanvas = document.createElement('canvas'), stctx = stillCanvas.getContext('2d', { willReadFrequently: true });
+  var memberToken = 0;
 
   function t(k) { return DS.t(k); }
 
@@ -52,6 +58,7 @@
     if (m.type === 'faces') {
       faceBusy = false; faceSpare = m.rgba;
       if (running && !frozen) handleFaces(m.faces, m.w);
+      if (running && !frozen) keepSharpest(m.faces, m.w);
     } else if (m.type === 'encoder-ready') {
       encReady = true; verifyPending();
     } else if (m.type === 'encoder-error') {
@@ -61,10 +68,15 @@
       if (m.error) { encFailed = true; } else {
         verifyIds.forEach(function (id, i) {
           var sp = spots[id];
-          if (sp) { sp.sim = m.sims[i]; sp.ok = m.sims[i] >= CONFIG.faceMinSim; }
+          if (sp) {
+            sp.sim = m.sims[i];
+            sp.ok = sp.sim >= CONFIG.faceMinSim || (sp.sim >= (CONFIG.faceMinSimSure || 1) && (sp.best || 0) >= 0.6);
+          }
         });
       }
       updateStale(); verifyPending();
+    } else if (m.type === 'member' && m.token === memberToken) {
+      if (onMember) { var g = onMember; onMember = null; g(m.error ? null : m.member); }
     } else if (m.type === 'identity' && m.token === identToken) {
       identity = m.error ? { error: m.error } : m;
       if (onIdentity) { var f = onIdentity; onIdentity = null; f(); }
@@ -149,6 +161,8 @@
       var fw = Math.min(CONFIG.faceAnalysisWidth || 640, vw), fh = Math.round(vh * fw / vw);
       if (faceCanvas.width !== fw || faceCanvas.height !== fh) { faceCanvas.width = fw; faceCanvas.height = fh; }
       fctx.drawImage(video, 0, 0, fw, fh);
+      if (snapCanvas.width !== vw || snapCanvas.height !== vh) { snapCanvas.width = vw; snapCanvas.height = vh; }
+      sctx.drawImage(video, 0, 0, vw, vh);
       var fimg = fctx.getImageData(0, 0, fw, fh);
       var fb = (faceSpare && faceSpare.byteLength === fimg.data.byteLength) ? faceSpare : new ArrayBuffer(fimg.data.byteLength);
       new Uint8ClampedArray(fb).set(fimg.data);
@@ -209,7 +223,7 @@
       if (near && near.charAt(0) !== '~') { if (now - spots[near].seen < 1500) return; }
       var id = near || ('~' + (++faceSeq));
       placeSpot(id, sc.x, sc.y, r, now);
-      var s = spots[id]; s.face = { x: f.x, y: f.y, w: f.w, aw: aw, score: f.score };
+      var s = spots[id]; s.face = { x: f.x, y: f.y, w: f.w, aw: aw, score: f.score }; s.lastFace = f;
       s.hits = (s.hits || 0) + 1; s.best = Math.max(s.best || 0, f.score);
     });
     verifyPending();
@@ -226,14 +240,15 @@
     var ids = Object.keys(spots).filter(function (id) {
       var sp = spots[id];
       return id.charAt(0) === '~' && sp.face && now - sp.seen < 600 &&
-        (sp.ok === undefined || (sp.ok === false && now - sp.vAt > 8000));
+        (sp.ok === undefined || (sp.ok === false && (now - sp.vAt > 8000 ||
+          (now - sp.vAt > 1200 && sp.sharp > 1.4 * (sp.vSharp || 0)))));
     }).sort(function (a, b) {
       return rank(spots[a]) - rank(spots[b]) ||
         Math.hypot(spots[a].x - cx, spots[a].y - cy) - Math.hypot(spots[b].x - cx, spots[b].y - cy);
     }).slice(0, 1);   // one at a time, so circles appear one by one, nearest the middle first
     if (!ids.length) return;
-    ids.forEach(function (id) { spots[id].vAt = now; });
-    var crops = cropFaces(ids.map(function (id) { return spots[id].face; }));
+    ids.forEach(function (id) { spots[id].vAt = now; spots[id].vSharp = spots[id].sharp || 0; });
+    var crops = ids.map(function (id) { return bestCrop(spots[id]); });
     verifyBusy = true; verifyIds = ids; verifyToken++;
     nameWorker.postMessage({ type: 'verify', token: verifyToken, crops: crops }, crops.map(function (c) { return c.buffer; }));
   }
@@ -327,22 +342,60 @@
         Math.hypot(s.face.x - sel.face.x, s.face.y - sel.face.y) < 5 * Math.max(s.face.w, sel.face.w);
     }).sort(function (a, b) {
       return Math.hypot(a.face.x - sel.face.x, a.face.y - sel.face.y) - Math.hypot(b.face.x - sel.face.x, b.face.y - sel.face.y);
-    }).map(function (s) { return s.face; }).slice(0, 4);
-    var list = [sel.face].concat(others), crops = cropFaces(list), k = video.videoWidth / sel.face.aw;
-    nameWorker.postMessage({ type: 'identify', token: identToken, crops: crops,
+    }).slice(0, 4);
+    var me = spots[sel.id] || { face: sel.face };
+    // the tapped face twice (as framed for the check, and wider), its neighbours wider
+    var list = [me].concat(others), crops = [bestCrop(me)].concat(list.map(function (s) { return bestCrop(s, true); }));
+    list = list.map(function (s) { return s.face; });
+    var k = video.videoWidth / sel.face.aw;
+    nameWorker.postMessage({ type: 'identify', token: identToken, crops: crops, twice: true,
       faces: list.map(function (f) { return { x: f.x * k, y: f.y * k, w: f.w * k }; }) },
       crops.map(function (c) { return c.buffer; }));
   }
   // Square crops around faces from the full-size picture, framed like the portrait crops.
-  function cropFaces(list) {
+  // wide: a looser crop. Painted faces seen from afar come out of the face finder a bit small,
+  // and naming works better on a crop about 1.3 times wider than the finder's box.
+  var WIDE = 1.3;
+  function cropFaces(list, src, wide) {
     var size = 224;
+    src = src || video;
     cropCanvas.width = cropCanvas.height = size;
     return list.map(function (f) {
-      var k = video.videoWidth / f.aw, side = f.w * 1.8 * k, cx = f.x * k, cy = (f.y - 0.12 * f.w) * k;
+      var k = video.videoWidth / f.aw, w = f.w * (wide ? WIDE : 1), side = w * 1.8 * k, cx = f.x * k, cy = (f.y - 0.12 * w) * k;
       cctx.fillStyle = '#000'; cctx.fillRect(0, 0, size, size);
-      cctx.drawImage(video, cx - side / 2, cy - side / 2, side, side, 0, 0, size, size);
+      cctx.drawImage(src, cx - side / 2, cy - side / 2, side, side, 0, 0, size, size);
       return cctx.getImageData(0, 0, size, size).data;
     });
+  }
+  // How sharp a crop is: the mean squared Laplacian of its middle (the face), in green.
+  function sharpness(px) {
+    var S = 224, sum = 0, n = 0;
+    for (var y = 56; y < 168; y += 2) for (var x = 56; x < 168; x += 2) {
+      var i = (y * S + x) * 4 + 1;
+      var l = 4 * px[i] - px[i - 4] - px[i + 4] - px[i - S * 4] - px[i + S * 4];
+      sum += l * l; n++;
+    }
+    return sum / n;
+  }
+  // After each search, cut every circled face from the picture it was found in, and keep it if
+  // it is the sharpest view of that face lately.
+  function keepSharpest(faces, aw) {
+    if (!snapCanvas.width || !faces.length) return;
+    var now = Date.now();
+    Object.keys(spots).forEach(function (id) {
+      var s = spots[id];
+      if (id.charAt(0) !== '~' || !s.face || s.face.aw !== aw || now - s.seen > 50) return;
+      if (faces.indexOf(s.lastFace) < 0) return;
+      var c = cropFaces([s.face], snapCanvas)[0], sh = sharpness(c);
+      if (!s.crop || sh >= s.sharp || now - s.cropAt > 2500) {
+        s.crop = c; s.wideCrop = cropFaces([s.face], snapCanvas, true)[0]; s.sharp = sh; s.cropAt = now;
+      }
+    });
+  }
+  // A copy of a circle's sharpest face crop (or a fresh cut when there is none yet).
+  function bestCrop(s, wide) {
+    var c = wide ? s.wideCrop : s.crop;
+    return c ? new Uint8ClampedArray(c) : cropFaces([s.face], stillCanvas.width && frozen ? stillCanvas : video, wide)[0];
   }
   // Run fn once the name is known (shows "Looking closely" meanwhile).
   function whenIdentified(fn) {
@@ -363,6 +416,8 @@
     var vw = video.videoWidth, vh = video.videoHeight, s = Math.max(cw / vw, ch / vh);
     fx.setTransform(dpr, 0, 0, dpr, 0, 0);
     fx.drawImage(video, (cw - vw * s) / 2, (ch - vh * s) / 2, vw * s, vh * s);
+    if (stillCanvas.width !== vw || stillCanvas.height !== vh) { stillCanvas.width = vw; stillCanvas.height = vh; }
+    stctx.drawImage(video, 0, 0, vw, vh);
     freezeCanvas.hidden = false;
     Object.keys(spots).forEach(function (id) { spots[id].el.hidden = true; });
     bannerEl.hidden = true;
@@ -386,7 +441,7 @@
     Object.keys(spots).forEach(function (id) { spots[id].el.hidden = false; spots[id].seen = Date.now() - 2600; });
     $('#guess-input').value = '';
     hideList();
-    identToken++; identity = null; onIdentity = null; pickMode = false;
+    identToken++; identity = null; onIdentity = null; pickMode = false; memberToken++; onMember = null;
     if (!silent && running) setStatus(t('cameraPoint'));
   }
 
@@ -407,19 +462,36 @@
   // "Tell me": a wall-photo circle already knows the saint; a face from the face finder is named
   // from the portraits, and when the match isn't sure the person picks from the closest three.
   function tell() {
-    if (!isFace(selected)) { reveal(); return; }
+    if (!isFace(selected)) { revealWall(); return; }
     whenIdentified(function () {
       if (!identity || identity.error) { showPick([]); return; }
-      if (identity.sure) reveal(identity.id); else showPick(identity.ranked.slice(0, 3));
+      if (identity.sure) reveal(identity.id, identity.member); else showPick(identity.ranked.slice(0, 3));
     });
   }
+  // A wall-photo circle knows the saint. For a pair it doesn't know which of the two, so the
+  // face under the circle is compared with both portraits.
+  var onMember = null;
+  function revealWall() {
+    var s = DS.byId[selected.id];
+    if (!s || !s.members || s.members.length !== 2 || !nameWorker || encFailed) { reveal(); return; }
+    var cw = screen.clientWidth, ch = screen.clientHeight, vw = video.videoWidth, vh = video.videoHeight;
+    var k = Math.max(cw / vw, ch / vh);
+    var face = { x: (selected.x - (cw - vw * k) / 2) / k, y: (selected.y - (ch - vh * k) / 2) / k, w: selected.r / 1.5 / k, aw: vw };
+    var crop = cropFaces([face], stillCanvas.width ? stillCanvas : video)[0], token = ++memberToken;
+    showStep('wait');
+    onMember = function (m) { if (token === memberToken) reveal(selected.id, m); };
+    nameWorker.postMessage({ type: 'member', token: token, id: selected.id, crops: [crop] }, [crop.buffer]);
+  }
+  function memberName(m) { return (DS.t('memberNames') || {})[m] || m; }
   var pickMode = false;
   function showPick(cands) {
     var ul = $('#pick-list');
     cands = cands.filter(function (c) { return DS.byId[c.id]; });
     ul.innerHTML = cands.map(function (c) {
-      var s = DS.byId[c.id], name = s ? DS.saintText(s).name : c.id;
-      return '<li><button type="button" class="pick__btn" data-id="' + c.id + '"><img src="img/saints/thumbs/' + c.id +
+      var s = DS.byId[c.id], img = c.member && DS.memberImg && DS.memberImg[c.member];
+      var name = img ? memberName(c.member) : s ? DS.saintText(s).name : c.id;
+      return '<li><button type="button" class="pick__btn" data-id="' + c.id + '"' + (img ? ' data-member="' + c.member.replace(/"/g, '&quot;') + '"' : '') +
+        '><img src="img/saints/thumbs/' + (img || c.id) +
         '.jpg?v=' + CONFIG.version + '" alt="" width="64" height="64"><span>' + name.replace(/</g, '&lt;') + '</span></button></li>';
     }).join('');
     ul.hidden = !cands.length;
@@ -427,7 +499,7 @@
     var first = $('.pick__btn', ul) || $('#pick-other'); first.focus({ preventScroll: true });
   }
   $('#pick-list').addEventListener('click', function (e) {
-    var b = e.target.closest('.pick__btn'); if (b) reveal(b.dataset.id);
+    var b = e.target.closest('.pick__btn'); if (b) reveal(b.dataset.id, b.dataset.member);
   });
   $('#pick-other').addEventListener('click', function () {
     pickMode = true; showStep('guess');
@@ -438,11 +510,13 @@
     setTimeout(function () { $('#guess-input').focus(); }, 50);
   });
 
-  function reveal(id) {
+  function reveal(id, member) {
     id = id || selected.id;
     if (!DS.byId[id]) { unfreeze(); return; }
+    // a pair named without saying which one: the face's own match says, if it is this pair
+    if (!member && identity && !identity.error && identity.id === id) member = identity.member;
     tray.hidden = true;
-    DS.openSheet(id, { onClose: function () { unfreeze(); } });
+    DS.openSheet(id, { member: member || null, onClose: function () { unfreeze(); } });
   }
 
   // ---------- guessing with autocomplete ----------
@@ -457,7 +531,8 @@
       var s = DS.byId[l.id], es = (window.SAINTS_ES || {})[l.id] || {};
       var names = [l.label];
       if (l.label === s.name) names = names.concat(s.aliases, es.name ? [es.name] : []);
-      out.push({ id: l.id, label: l.label === s.name && DS.lang === 'es' && es.name ? es.name : l.label, names: names });
+      out.push({ id: l.id, label: l.label === s.name && DS.lang === 'es' && es.name ? es.name : l.label, names: names,
+        member: l.label !== s.name && DS.memberImg && DS.memberImg[l.label] ? l.label : null });
     });
     return out;
   }
@@ -494,12 +569,13 @@
     e.preventDefault();
     if (!input.value.trim()) { input.focus(); return; }
     var guessId = picked ? picked.id : null;
+    guessMember = picked ? picked.member : null;
     if (!guessId) {
       var best = Fuzzy.search(input.value, entries(), 1)[0];
-      if (best && best.score >= 0.8) guessId = best.entry.id;
+      if (best && best.score >= 0.8) { guessId = best.entry.id; guessMember = best.entry.member; }
     }
     input.blur(); hideList();
-    if (pickMode) { if (guessId) reveal(guessId); else input.focus(); return; }
+    if (pickMode) { if (guessId) reveal(guessId, guessMember); else input.focus(); return; }
     if (isFace(selected)) { whenIdentified(function () { judgeFaceGuess(guessId); }); return; }
     var right = guessId === selected.id;
     var form = $('#guess-form');
@@ -507,9 +583,10 @@
     setTimeout(function () {
       showStep('result');
       $('.tray__result').textContent = right ? t('youreRight') : t('notQuite');
-      setTimeout(reveal, 1200);
+      setTimeout(revealWall, 1200);
     }, 350);
   });
+  var guessMember = null;
 
   // A guess about a face from the face finder: right if it is the sure match, or one of the
   // close matches when the portraits can't tell.
@@ -519,7 +596,7 @@
     showStep('result');
     $('.tray__result').textContent = right ? t('youreRight') : t('notQuite');
     setTimeout(function () {
-      if (right) reveal(guessId);
+      if (right) reveal(guessId, identity.sure ? identity.member : guessMember);
       else if (ok && identity.sure) reveal(identity.id);
       else showPick(ok ? identity.ranked.slice(0, 3) : []);
     }, 1200);
