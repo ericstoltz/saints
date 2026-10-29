@@ -21,7 +21,15 @@
   S.saints.forEach(function (s) { byId[s.id] = s; });
 
   // ---------- language ----------
+  // Feature flag: Spanish stays hidden until its review is done. Set to true to show it again.
+  // Adding ?es=1 to the URL turns it on for one visit, for reviewers.
+  var SPANISH_ENABLED = false || /[?&]es=1\b/.test(location.search);
   var lang = store('lang') || ((navigator.language || 'en').slice(0, 2) === 'es' ? 'es' : 'en');
+  if (!SPANISH_ENABLED) {
+    lang = 'en';
+    $$('[data-lang="es"]').forEach(function (b) { b.remove(); });
+    $$('.menu__lang').forEach(function (g) { g.hidden = true; });
+  }
   function t(key) { return (C[lang] && C[lang][key] != null) ? C[lang][key] : C.en[key]; }
 
   function store(k, v) {
