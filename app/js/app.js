@@ -225,6 +225,7 @@
   // between the two portraits.
   var MEMBER_IMG = { 'Nellie Lincoln': 'nellie-lincoln', 'Dorothy Lincoln': 'dorothy-lincoln', 'Sergius': 'sergius', 'Bacchus': 'bacchus' };
   var MEMBER_DATES = { 'Nellie Lincoln': '1862–1956' };   // from her profile text
+  DS.memberImg = MEMBER_IMG;
   function thumbOf(e) { return 'img/saints/thumbs/' + (MEMBER_IMG[e.label] || e.id) + '.jpg?v=' + CONFIG.version; }
   function pairImages(s, dir) {
     var ims = s.members.map(function (m) { return MEMBER_IMG[m]; });

@@ -34,11 +34,15 @@ with the saints' portraits, one straight-on portrait per saint. No wall photos a
   spot is checked: a second copy of the worker embeds it (below) and the circle shows only if it
   looks enough like some saint's portrait (`faceMinSim` in `js/config.js`). Spots the finder is
   very sure of show right away while their check waits its turn.
+- Every circle keeps the sharpest view of its face from the last few seconds (a moving phone, or
+  the tap itself, blurs some frames), and that view is what gets checked and named.
 - When a face is tapped, it and its nearest neighbours are cut from the full-size picture and
   turned into image embeddings by `models/siglip.onnx` (Google's SigLIP B/16 image encoder,
   Apache 2.0, 4-bit, 55 MB, downloaded in the background when the camera opens).
 - Each embedding is compared with the portraits (`data/faces.bin`). The order of saints on the
   mural (`data/faces.js`) then checks that each guess agrees with the faces next to it.
+- Sergius and Bacchus, and Nellie and Dorothy Lincoln, each have their own portrait and place on
+  the mural, so the shared profile opens under the name of the one pointed at.
 - When the match is clear, the profile opens. Otherwise the person picks from the three
   closest saints, or types a name.
 
